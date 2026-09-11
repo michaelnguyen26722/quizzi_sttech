@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizizz STTech Ecosystem</title>
+    <!-- Nhúng Google Font & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Nhúng thư viện Canvas Confetti tạo hiệu ứng pháo hoa -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #8854c0;
+            --primary-dark: #6c3ca1;
+            --background: #2d1b4e;
+            --card-bg: #ffffff;
+            --text-main: #2b2b2b;
+            --correct: #26d07c;
+            --incorrect: #ff3366;
+            --shadow-3d: 0 8px 0 #bc9be4, 0 15px 20px rgba(0,0,0,0.3);
+            --btn-shadow: 0 5px 0 var(--primary-dark);
+            --option-shadow: 0 4px 0 #e0e0e0;
+        }
+
+        * { box-sizing: border-box; font-family: 'Quicksand', sans-serif; transition: all 0.2s ease; }
+        body { background: var(--background); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+
+        .quiz-container {
+            background: var(--card-bg);
+            max-width: 750px;
+            width: 100%;
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: var(--shadow-3d);
+            transform: translateY(-5px);
+            position: relative;
+        }
+
+        h1 { font-family: 'Fredoka One', cursive; color: var(--primary); text-align: center; margin-top: 0; font-size: 2.2rem; text-shadow: 2px 2px 0px #ebdcf9; letter-spacing: 1px; }
+        .description { text-align: center; color: #666; margin-bottom: 25px; font-weight: 500; }
+
+        .progress-container { background: #eee; height: 16px; border-radius: 10px; margin-bottom: 30px; position: relative; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+        .progress-bar { background: linear-gradient(90deg, #a478dc, var(--primary)); height: 100%; width: 0%; border-radius: 10px; }
+        .stats { display: flex; justify-content: space-between; font-weight: 700; color: var(--primary); margin-bottom: 10px; font-size: 1.1rem; }
+
+        .question-box { background: #f8f5fd; padding: 25px; border-radius: 18px; border: 2px dashed var(--primary); margin-bottom: 25px; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+        .question-text { font-size: 1.3rem; font-weight: 700; color: var(--text-main); text-align: center; line-height: 1.5; }
+        .software-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #ffaa00; color: white; padding: 4px 15px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 4px 0 #cc8800; }
+
+        .options-grid { display: grid; grid-template-columns: 100%; gap: 15px; margin-bottom: 25px; }
+        .option-card {
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 18px 22px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--option-shadow);
+            position: relative;
+        }
+        .option-card:hover:not(.disabled) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 7px 0 #bc9be4; background-color: #faf7fd; }
+        .option-card:active:not(.disabled) { transform: translateY(1px); box-shadow: 0 3px 0 #bc9be4; }
+        .option-prefix { font-family: 'Fredoka One', cursive; margin-right: 15px; color: #a478dc; background: #f0e6fc; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 0.95rem; }
+
+        .option-card.correct { background-color: #e8fcf2 !important; border-color: var(--correct) !important; color: #0f6e3f !important; box-shadow: 0 4px 0 #1b9458 !important; }
+        .option-card.correct .option-prefix { background-color: var(--correct); color: white; }
+        .option-card.incorrect { background-color: #ffebeb !important; border-color: var(--incorrect) !important; color: #b31237 !important; box-shadow: 0 4px 0 #bd1a42 !important; }
+        .option-card.incorrect .option-prefix { background-color: var(--incorrect); color: white; }
+        .option-card.disabled { cursor: not-allowed; pointer-events: none; }
+
+        .explanation-box { background: #fff8e7; border-left: 5px solid #ffaa00; border-radius: 8px; padding: 15px 20px; margin-bottom: 25px; display: none; animation: fadeIn 0.4s ease; }
+        .explanation-title { font-weight: 700; color: #b37400; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+        .explanation-text { color: #555; line-height: 1.5; font-size: 0.95rem; }
+
+        .actions-btn {
+            display: block;
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--btn-shadow);
+            text-align: center;
+        }
+        .actions-btn:hover { background: #7946b2; }
+        .actions-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--primary-dark); }
+
+        .result-screen { text-align: center; display: none; padding: 20px 0; }
+        .result-icon { font-size: 5rem; color: #ffaa00; margin-bottom: 20px; animation: bounce 1s infinite alternate; }
+        .score-big { font-family: 'Fredoka One', cursive; font-size: 3.5rem; color: var(--primary); margin: 15px 0; text-shadow: 3px 3px 0px #ebdcf9; }
+        .score-comment { font-size: 1.3rem; font-weight: 700; color: #444; margin-bottom: 30px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <!-- Màn hình làm bài -->
+        <div id="quiz-screen">
+            <h1 id="main-title">Quizizz STTech</h1>
+            <div class="description" id="main-desc">Đang xử lý dữ liệu...</div>
+            
+            <div class="stats">
+                <span id="progress-text">Câu hỏi 1/40</span>
+                <span id="score-text">Đúng: 0</span>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div style="position: relative;">
+                <div class="software-badge" id="soft-badge">ST-EMS</div>
+                <div class="question-box">
+                    <div class="question-text" id="q-text">Nội dung câu hỏi đang tải...</div>
+                </div>
+            </div>
+
+            <div class="options-grid" id="options-box">
+                <!-- Các đáp án sinh tự động bằng JS -->
+            </div>
+
+            <div class="explanation-box" id="explain-box">
+                <div class="explanation-title"><i class="fa-solid fa-lightbulb"></i> Đáp án & Giải thích độc quyền:</div>
+                <div class="explanation-text" id="explain-text">Nội dung giải thích...</div>
+            </div>
+
+            <button class="actions-btn" id="next-btn" onclick="handleNextStep()" style="display: none;">Câu Tiếp Theo <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <!-- Màn hình kết quả -->
+        <div class="result-screen" id="result-screen">
+            <div class="result-icon"><i class="fa-solid fa-trophy"></i></div>
+            <h1>Chiến Thắng Hoàn Toàn!</h1>
+            <p style="color: #666; font-size: 1.1rem;">Bạn đã hoàn thành bộ ôn tập 15 Phần mềm thuộc Hệ sinh thái STTech</p>
+            <div class="score-big" id="final-score">00/40</div>
+            <div class="score-comment" id="final-comment">Tuyệt vời ông mặt trời!</div>
+            <button class="actions-btn" onclick="restartQuiz()"><i class="fa-solid fa-rotate-right"></i> Thử Thách Lại Từ Đầu</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+              "id": 1,
+              "software_code": "ST-EMS",
+              "question": "Phần mềm ST-EMS phục vụ việc quản lý dạy và học trực tuyến bám sát quy định pháp lý chính nào của Bộ GD&ĐT?",
+              "options": [
+                "A. Thông tư 16/2022/TT-BGDĐT",
+                "B. Thông tư 09/2021/TT-BGDĐT",
+                "C. Quyết định 3806/QĐ-BGDĐT",
+                "D. Nghị định 90/2020/NĐ-CP"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-EMS đáp ứng Thông tư 09/2021/TT-BGDĐT quy định về quản lý và tổ chức dạy học trực tuyến trong cơ sở giáo dục phổ thông và GDTX."
+            },
+            {
+              "id": 2,
+              "software_code": "ST-EMS",
+              "question": "Phân hệ 'Lớp học trực tuyến trực tiếp (Meeting Online)' trong ST-EMS tích hợp công cụ nền tảng nào sau đây?",
+              "options": [
+                "A. Zoom Meetings",
+                "B. Microsoft Teams",
+                "C. Google Meet",
+                "D. Cisco Webex"
+              ],
+              "correct_answer": "C",
+              "explanation": "ST-EMS tích hợp trực tiếp với hệ thống Google Meet cùng các công cụ bảng trắng, điểm danh tự động và quay phim màn hình."
+            },
+            {
+              "id": 3,
+              "software_code": "ST-EMS",
+              "question": "Tính năng nào trong ST-EMS giúp phụ huynh đồng hành học cùng con tại nhà?",
+              "options": [
+                "A. Tự động chấm điểm bài tập tự luận",
+                "B. Kho tài liệu học tập bổ sung kiến thức chuẩn theo chương trình trên lớp",
+                "C. Tự động cấp bằng chứng nhận hoàn thành khóa học",
+                "D. Phê duyệt tờ trình xét tốt nghiệp trực tuyến"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-EMS cung cấp kho tài liệu học tập bổ sung cho phụ huynh tra cứu để hướng dẫn và bổ sung kiến thức con còn thiếu."
+            },
+            {
+              "id": 4,
+              "software_code": "ST-ETEST",
+              "question": "Kỹ thuật ra đề thi nổi bật nhất trong ST-ETEST nhằm đáp ứng định hướng đánh giá năng lực học sinh của Bộ GD&ĐT là gì?",
+              "options": [
+                "A. Trộn đề thi thủ công theo thứ tự bảng chữ cái",
+                "B. Trộn đề theo phương pháp tổ hợp",
+                "C. Tự động đảo ngẫu nhiên không theo ma trận",
+                "D. Xuất file đề thi mã hóa PDF chống sao chép"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-ETEST hỗ trợ trộn đề theo phương pháp tổ hợp kết hợp nhiều mảng kiến thức/môn học nhằm đánh giá năng lực học sinh."
+            },
+            {
+              "id": 5,
+              "software_code": "ST-ETEST",
+              "question": "Mô hình vận hành CSDL của phần mềm ST-ETEST có đặc điểm gì nổi bật?",
+              "options": [
+                "A. Chỉ hoạt động 100% offline trên máy tính cá nhân",
+                "B. Kết hợp giữa hình thức Offline (cục bộ) và Online (đồng bộ CSDL dùng chung lên Server)",
+                "C. Bắt buộc phải cài đặt máy chủ riêng tại từng trường học",
+                "D. Chỉ lưu trữ đề thi dưới dạng file ảnh JPG"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-ETEST triển khai kết hợp offline cho giáo viên làm việc cục bộ và online để đồng bộ CSDL dùng chung với Server quản lý."
+            },
+            {
+              "id": 6,
+              "software_code": "ST-ETEST",
+              "question": "Khi nhập hàng loạt câu hỏi từ file Word vào ST-ETEST, phần mềm xử lý như thế nào nếu có câu sai định dạng?",
+              "options": [
+                "A. Tự động xóa bỏ toàn bộ file nhập vào",
+                "B. Báo lỗi hệ thống và dừng chương trình",
+                "C. Tự động chỉ ra các câu lỗi và xuất ra file Word để người dùng dễ dàng chỉnh sửa",
+                "D. Tự động sửa lại nội dung câu hỏi theo AI"
+              ],
+              "correct_answer": "C",
+              "explanation": "ST-ETEST tự động phát hiện câu hỏi không đúng định dạng và xuất ra file Word riêng cho giáo viên sửa."
+            },
+            {
+              "id": 7,
+              "software_code": "DTI",
+              "question": "Bộ tiêu chí Đánh giá chuyển đổi số dành cho Cơ quan quản lý giáo dục Cấp Sở & Cấp Phòng (theo QĐ 3806/QĐ-BGDĐT) gồm bao nhiêu trụ cột và tiêu chí?",
+              "options": [
+                "A. 5 trụ cột – 25 tiêu chí",
+                "B. 6 trụ cột – 48 tiêu chí – hơn 140 minh chứng",
+                "C. 8 trụ cột – 50 tiêu chí",
+                "D. 4 trụ cột – 30 tiêu chí"
+              ],
+              "correct_answer": "B",
+              "explanation": "Theo QĐ 3806/QĐ-BGDĐT, bộ tiêu chí DTI cấp Sở/Phòng gồm 6 trụ cột, 48 tiêu chí và hơn 140 minh chứng."
+            },
+            {
+              "id": 8,
+              "software_code": "DTI",
+              "question": "Căn cứ pháp lý áp dụng đánh giá chuyển đổi số cho Trường Phổ thông & GDTX trên hệ thống DTI là văn bản nào?",
+              "options": [
+                "A. Quyết định 3806/QĐ-BGDĐT",
+                "B. Quyết định 3276/QĐ-BGDĐT",
+                "C. Quyết định 4725/QĐ-BGDĐT",
+                "D. Thông tư 09/2024/TT-BGDĐT"
+              ],
+              "correct_answer": "C",
+              "explanation": "Quyết định 4725/QĐ-BGDĐT ban hành bộ tiêu chí CĐS dành cho các trường phổ thông và trung tâm GDTX."
+            },
+            {
+              "id": 9,
+              "software_code": "DTI",
+              "question": "Quy trình đánh giá Chuyển đổi số trên hệ thống DTI gồm mấy bước tiêu chuẩn?",
+              "options": [
+                "A. 3 bước (Tự đánh giá -> Thẩm định -> Xuất báo cáo)",
+                "B. 4 bước (Cơ sở tự đánh giá -> Phòng/Sở thẩm định -> Hội đồng Sở công nhận -> Toàn ngành công bố & đồng bộ)",
+                "C. 5 bước (Lập kế hoạch -> Nhập liệu -> Chấm điểm -> Duyệt -> Lưu kho)",
+                "D. 2 bước (Chấm online -> Ban hành quyết định)"
+              ],
+              "correct_answer": "B",
+              "explanation": "Quy trình DTI chuẩn gồm 4 bước khép kín từ trường tự đánh giá đến thẩm định, công nhận và đồng bộ CSDL Bộ GD&ĐT."
+            },
+            {
+              "id": 10,
+              "software_code": "QA",
+              "question": "Chức năng cốt lõi của phần mềm QA trong hệ sinh thái STTech là gì?",
+              "options": [
+                "A. Đánh giá và quản lý hồ sơ kiểm định chất lượng cơ sở giáo dục",
+                "B. Quản lý điểm số và danh mục lớp học",
+                "C. Tự động bóc tách OCR hồ sơ lưu trữ",
+                "D. Quản lý phôi bằng và cấp bản sao văn bằng"
+              ],
+              "correct_answer": "A",
+              "explanation": "QA là phần mềm Kiểm định chất lượng giáo dục, chuyên quản lý hồ sơ và quy trình kiểm định chất lượng các trường."
+            },
+            {
+              "id": 11,
+              "software_code": "EDU",
+              "question": "Cổng thông tin điện tử Giáo dục (EduPortal AI / EDU) thực hiện công khai giáo dục theo văn bản quy định mới nhất nào?",
+              "options": [
+                "A. Thông tư 36/2017/TT-BGDĐT",
+                "B. Thông tư 09/2024/TT-BGDĐT",
+                "C. Thông tư 16/2022/TT-BGDĐT",
+                "D. Nghị định 90/2020/NĐ-CP"
+              ],
+              "correct_answer": "B",
+              "explanation": "Hệ thống EDU công khai giáo dục 5 nội dung (Đội ngũ, CSVC, Tài chính, Chất lượng GD, Kế hoạch năm) theo Thông tư 09/2024/TT-BGDĐT."
+            },
+            {
+              "id": 12,
+              "software_code": "EDU",
+              "question": "Trợ lý AI (EduPortal AI) tích hợp trên Cổng thông tin EDU có vai trò chính là gì?",
+              "options": [
+                "A. Tự động chấm bài thi tự luận của học sinh",
+                "B. Hỗ trợ tra cứu tự động về tuyển sinh, học bạ số và thủ tục hành chính",
+                "C. Tự động xếp thời khóa biểu cho nhà trường",
+                "D. Thay thế hoàn toàn giáo viên trong việc giảng dạy"
+              ],
+              "correct_answer": "B",
+              "explanation": "Trợ lý EduPortal AI hỗ trợ bạn đọc, phụ huynh tra cứu tự động về tuyển sinh, học bạ số và thủ tục hành chính 24/7."
+            },
+            {
+              "id": 13,
+              "software_code": "ST-AMS",
+              "question": "Đặc điểm nghiệp vụ vượt trội của ST-AMS trong công tác phân tuyến tuyển sinh là gì?",
+              "options": [
+                "A. Chỉ phân tuyến theo cấp Huyện",
+                "B. Phân tuyến chi tiết theo địa bàn sâu đến tận Khu phố / Tổ / Thôn / Ấp / Xóm",
+                "C. Tự động phân chia học sinh ngẫu nhiên không cần địa chỉ",
+                "D. Phân tuyến dựa trên điểm thi môn Toán và Ngữ văn"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-AMS cài đặt danh mục địa giới 3 cấp và phân tuyến chi tiết theo địa bàn đến tận Khu phố/Tổ/Thôn/Ấp/Xóm giúp phụ huynh biết chính xác trường đúng tuyến."
+            },
+            {
+              "id": 14,
+              "software_code": "ST-AMS",
+              "question": "Sau khi phụ huynh nộp hồ sơ tuyển sinh trực tuyến thành công trên ST-AMS, hệ thống sẽ tự động gửi gì đến phụ huynh?",
+              "options": [
+                "A. Mã bảo mật và mã số thuế",
+                "B. Thông báo đăng ký thành công qua Email và thông báo lịch hẹn làm việc với nhà trường",
+                "C. Giấy nhập học chính thức ngay lập tức",
+                "D. Thẻ thư viện điện tử"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-AMS tự động gửi email xác nhận nộp thành công và lịch hẹn làm việc với hội đồng tuyển sinh để tránh ùn tắc."
+            },
+            {
+              "id": 15,
+              "software_code": "ST-AMS",
+              "question": "Ngoài nghiệp vụ tuyển sinh, phần mềm ST-AMS còn tích hợp phân hệ đặc thù nào cho các trường THCS?",
+              "options": [
+                "A. Xét công nhận tốt nghiệp THCS và xuất giấy chứng nhận tốt nghiệp tạm thời",
+                "B. Quản lý phôi bằng đại học",
+                "C. Tự động bóc tách tài liệu OCR",
+                "D. Tính dự toán tiền lương ngạch bậc"
+              ],
+              "correct_answer": "A",
+              "explanation": "ST-AMS tích hợp phân hệ Xét tốt nghiệp THCS, xuất danh sách và in giấy chứng nhận tốt nghiệp tạm thời."
+            },
+            {
+              "id": 16,
+              "software_code": "ST-LIB",
+              "question": "ST-LIB là sự kết hợp đồng bộ của 3 phân hệ liên thông dữ liệu nào?",
+              "options": [
+                "A. Quản lý nhân sự - Tính lương - Bảo hiểm",
+                "B. Thư viện số - Đánh giá thư viện đạt chuẩn (TT 16) - Quản lý thư viện trường học trực tuyến",
+                "C. Tuyển sinh - Thi trực tuyến - Cấp bằng",
+                "D. Số hóa tài liệu - Ký số - Đóng gói"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-LIB gồm 3 phân hệ cốt lõi: Thư viện số (ebook 3D), Đánh giá thư viện đạt chuẩn (TT 16/2022) và Quản lý thư viện trường học (DDC/Cutter)."
+            },
+            {
+              "id": 17,
+              "software_code": "ST-LIB",
+              "question": "Trong phân hệ Biên mục của ST-LIB, bộ mã nào được áp dụng để tự động mã hóa tên tài liệu và tên tác giả?",
+              "options": [
+                "A. Bộ mã Unicode UTF-8",
+                "B. Bộ mã Cutter",
+                "C. Bộ mã Barcode QR-Code",
+                "D. Bộ mã DDC 23"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-LIB hỗ trợ biên mục chuẩn DDC và tự động mã hóa tên tài liệu/tác giả theo bảng mã Cutter."
+            },
+            {
+              "id": 18,
+              "software_code": "ST-LIB",
+              "question": "Cách thức ST-LIB hỗ trợ thủ thư làm báo cáo Tự đánh giá thư viện theo Thông tư 16/2022/TT-BGDĐT là gì?",
+              "options": [
+                "A. Yêu cầu thủ thư nhập tay lại toàn bộ số liệu sách và lượt mượn",
+                "B. Tự động lấy số liệu liên thông từ phân hệ Quản lý mượn/trả và cơ sở dữ liệu thư viện",
+                "C. Chỉ cho phép tải biểu mẫu Word về làm thủ công",
+                "D. Tự động phê duyệt đạt chuẩn mà không cần minh chứng"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-LIB tự động kết xuất và liên thông dữ liệu mượn/đọc từ phân hệ quản lý thư viện vào các chỉ số tự đánh giá TT 16."
+            },
+            {
+              "id": 19,
+              "software_code": "ST-DMS",
+              "question": "Phần mềm ST-DMS đáp ứng dịch vụ hành chính công ở mức độ nào với phân hệ 'Cấp bản sao trực tuyến'?",
+              "options": [
+                "A. Mức độ 1 và 2",
+                "B. Mức độ 3 và 4",
+                "C. Chỉ phục vụ tra cứu nội bộ",
+                "D. Không hỗ trợ hành chính công"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-DMS hiện đại hóa thủ tục hành chính công, đáp ứng mức độ 3 và 4 cho phép công dân đăng ký cấp bản sao văn bằng trực tuyến."
+            },
+            {
+              "id": 20,
+              "software_code": "ST-DMS",
+              "question": "Tính năng 'Sổ gốc điện tử' trong ST-DMS mang lại giá trị quan trọng nào cho cơ quan quản lý?",
+              "options": [
+                "A. Thay thế việc ký duyệt của Lãnh đạo",
+                "B. Đính kèm và tra cứu trả về kết quả ảnh sổ gốc chính xác, bảo vệ dữ liệu vĩnh viễn chống hư hỏng giấy",
+                "C. Tự động in phôi bằng khi học sinh làm đơn",
+                "D. Tự động gửi phôi bằng qua bưu điện"
+              ],
+              "correct_answer": "B",
+              "explanation": "Sổ gốc điện tử trong ST-DMS đính kèm ảnh chụp sổ gốc, hỗ trợ tìm kiếm xác minh tức thì và bảo tồn lâu dài."
+            },
+            {
+              "id": 21,
+              "software_code": "ST-DMS",
+              "question": "Khi thực hiện in văn bằng hàng loạt trên ST-DMS, hệ thống sẽ cấp số hiệu văn bằng như thế nào?",
+              "options": [
+                "A. Giáo viên tự gõ tay từng số hiệu",
+                "B. Cấp số hiệu tự động theo danh sách phôi đã nhập và danh sách người học",
+                "C. Số hiệu được lấy ngẫu nhiên không theo thứ tự",
+                "D. Chỉ dùng 1 số hiệu duy nhất cho cả lớp"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-DMS tự động cấp số hiệu văn bằng chuẩn xác theo thứ tự danh sách phôi bằng và danh sách học sinh trúng tuyển."
+            },
+            {
+              "id": 22,
+              "software_code": "ST-TMIS",
+              "question": "Bộ phần mềm ST-TMIS là sự hợp nhất cốt lõi từ 2 dòng sản phẩm nào?",
+              "options": [
+                "A. EMS và ETEST",
+                "B. CMS (Chuẩn nghề nghiệp) và KPI (Đánh giá công chức/viên chức)",
+                "C. BHR và HRS",
+                "D. SMS và EDIS"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-TMIS là bộ phần mềm gộp chung quy trình từ CMS (Đánh giá chuẩn nghề nghiệp) và KPI (Đánh giá công chức/viên chức)."
+            },
+            {
+              "id": 23,
+              "software_code": "ST-TMIS",
+              "question": "Các căn cứ pháp lý chính quy định về đánh giá Chuẩn hiệu trưởng và Chuẩn nghề nghiệp giáo viên trên TMIS và CEMS bao gồm:",
+              "options": [
+                "A. Các Thông tư 14, 20, 25, 26 ban hành năm 2018 của Bộ GD&ĐT",
+                "B. Nghị định 64/2007/NĐ-CP",
+                "C. Thông tư 16/2022/TT-BGDĐT",
+                "D. Quyết định 3806/QĐ-BGDĐT"
+              ],
+              "correct_answer": "A",
+              "explanation": "Đánh giá chuẩn nghề nghiệp trên TMIS/CEMS tuân thủ các Thông tư 14 (Chuẩn HT phổ thông), 20 (Chuẩn GV phổ thông), 25 (Chuẩn HT mầm non), 26 (Chuẩn GV mầm non)."
+            },
+            {
+              "id": 24,
+              "software_code": "ST-CEMS",
+              "question": "Tính năng phát triển đội ngũ đặc thù chỉ có ở phần mềm ST-CEMS là gì?",
+              "options": [
+                "A. Tự động tính dự toán quỹ lương",
+                "B. Thống kê và thông báo danh sách giáo viên/cán bộ quản lý gần đủ điều kiện thành Cán bộ / Giáo viên cốt cán",
+                "C. Tự động bóc tách chữ ký số",
+                "D. Phát hiện câu hỏi trùng lặp trong đề thi"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-CEMS có tính năng tự động thống kê cảnh báo danh sách nhân sự gần đạt tiêu chí để quy hoạch làm Cán bộ/Giáo viên cốt cán địa phương."
+            },
+            {
+              "id": 25,
+              "software_code": "ST-KPI",
+              "question": "Phần mềm ST-KPI đáp ứng công tác đánh giá xếp loại chất lượng cán bộ, công chức, viên chức theo các Nghị định cốt lõi nào?",
+              "options": [
+                "A. Nghị định 90/2020/NĐ-CP và Nghị định 48/2023/NĐ-CP",
+                "B. Nghị định 131/2022/NĐ-CP",
+                "C. Thông tư 09/2021/TT-BGDĐT",
+                "D. Quyết định 749/QĐ-TTg"
+              ],
+              "correct_answer": "A",
+              "explanation": "ST-KPI bám sát Nghị định 90/2020/NĐ-CP và Nghị định 48/2023/NĐ-CP sửa đổi bổ sung về đánh giá chất lượng CCVC."
+            },
+            {
+              "id": 26,
+              "software_code": "ST-KPI",
+              "question": "Tính năng 'Kế thừa dữ liệu sang năm mới' trong KPI và TMIS mang lại lợi ích gì?",
+              "options": [
+                "A. Tự động tăng điểm đánh giá lên 10%",
+                "B. Cho phép chuyển dữ liệu báo cáo sang năm làm việc tiếp theo giúp giảm tối đa thời gian nhập lại từ đầu",
+                "C. Xóa toàn bộ dữ liệu đánh giá của năm cũ",
+                "D. Khóa tài khoản của những cán bộ xếp loại không đạt"
+              ],
+              "correct_answer": "B",
+              "explanation": "Kế thừa dữ liệu giúp chuyển toàn bộ danh mục, minh chứng và kế hoạch sang năm mới để đơn vị sử dụng lại mà không cần khai báo từ đầu."
+            },
+            {
+              "id": 27,
+              "software_code": "ST-BHR",
+              "question": "Chức năng cảnh báo tự động nổi bật của phần mềm ST-BHR giúp Phòng Nội vụ/UBND không bỏ sót quyền lợi cán bộ là gì?",
+              "options": [
+                "A. Nhắc lịch họp giao ban hàng ngày",
+                "B. Cảnh báo tự động đến hạn nâng bậc lương định kỳ/trước hạn, lịch nghỉ hưu, hết hạn hợp đồng qua Email",
+                "C. Cảnh báo số lượng học sinh nghỉ học",
+                "D. Cảnh báo quá hạn mượn sách thư viện"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-BHR tự động quét và gửi email cảnh báo nâng lương ngạch bậc, nghỉ hưu, hết hạn bổ nhiệm/hợp đồng đến cấp quản lý."
+            },
+            {
+              "id": 28,
+              "software_code": "ST-BHR",
+              "question": "Biểu mẫu quản lý sơ yếu lý lịch cán bộ chuẩn hóa được trích xuất tự động từ ST-BHR là mẫu nào?",
+              "options": [
+                "A. Mẫu 01/TCTW",
+                "B. Mẫu 2C/HS02",
+                "C. Mẫu 09/TT-BGDĐT",
+                "D. Mẫu 04a-BNV"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-BHR quản lý và kết xuất sơ yếu lý lịch cán bộ công chức theo mẫu chuẩn 2C/HS02."
+            },
+            {
+              "id": 29,
+              "software_code": "HRS",
+              "question": "Nghiệp vụ cốt lõi của phần mềm HRS trong nhóm quản trị nhân sự là gì?",
+              "options": [
+                "A. Đánh giá chuẩn giáo viên mầm non",
+                "B. Quản lý thông tin nhân sự, tính lương chi tiết và lập dự toán chi trả lương",
+                "C. Bóc tách chữ ký số tài liệu lưu trữ",
+                "D. Tổ chức trộn đề thi trắc nghiệm"
+              ],
+              "correct_answer": "B",
+              "explanation": "HRS chuyên trách mảng Quản lý nhân sự, tính toán tiền lương chi tiết và lập dự toán chi trả lương cho đơn vị."
+            },
+            {
+              "id": 30,
+              "software_code": "ST-TMIS",
+              "question": "Khác biệt về phân quyền nhóm người dùng giữa ST-TMIS và ST-CEMS là gì?",
+              "options": [
+                "A. TMIS chỉ dùng cho Cấp Trường, CEMS dùng cho Cấp Sở",
+                "B. TMIS bao gồm cả Admin/Lãnh đạo Phòng GD&ĐT, BGH, Giáo viên và Cán bộ công chức viên chức; còn CEMS tập trung vào BGH & Giáo viên mầm non/phổ thông",
+                "C. CEMS không cho phép lưu trữ minh chứng",
+                "D. TMIS không hỗ trợ báo cáo xuất file Excel"
+              ],
+              "correct_answer": "B",
+              "explanation": "TMIS gộp chung cả KPI nên phục vụ toàn bộ cán bộ công chức Phòng GD&ĐT lẫn viên chức nhà trường, còn CEMS tập chuyên sâu cho Chuẩn hiệu trưởng/giáo viên."
+            },
+            {
+              "id": 31,
+              "software_code": "ST-SMS",
+              "question": "Phần mềm ST-SMS tổ chức mô hình quản lý kho lưu trữ vật lý theo cấu trúc cây phân cấp nào?",
+              "options": [
+                "A. Tỉnh -> Huyện -> Xã -> Trường",
+                "B. Kho -> Kệ/Giá -> Phông -> Hộp -> Hồ sơ",
+                "C. Tòa nhà -> Phòng -> Bàn -> Ngăn kéo",
+                "D. Nhóm -> Danh mục -> File -> Trang"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-SMS sắp xếp tài liệu lưu trữ khoa học theo hình cây phân cấp: Kho -> Kệ/Giá -> Phông -> Hộp -> Hồ sơ."
+            },
+            {
+              "id": 32,
+              "software_code": "ST-SMS",
+              "question": "Trong phân hệ Cho mượn tài liệu của ST-SMS, quy trình kiểm soát an toàn tài liệu quan trọng được thực hiện ra sao?",
+              "options": [
+                "A. Cho phép người dùng tự do tải về mà không cần đăng nhập",
+                "B. Lập phiếu mượn trực tuyến và phải được duyệt bởi người quản lý có thẩm quyền",
+                "C. Tự động hủy tài liệu sau 7 ngày mượn",
+                "D. Chỉ cho mượn tài liệu gốc bản giấy"
+              ],
+              "correct_answer": "B",
+              "explanation": "Với các tài liệu quan trọng, ST-SMS bắt buộc lập phiếu mượn và phải qua phê duyệt trực tuyến của lãnh đạo có thẩm quyền."
+            },
+            {
+              "id": 33,
+              "software_code": "ST-SMS",
+              "question": "Điểm khác biệt về mặt vận hành giữa ST-SMS và EDIS là gì?",
+              "options": [
+                "A. SMS là phần mềm mới hơn EDIS",
+                "B. SMS nhập liệu thủ công nhiều hơn, đã triển khai lâu năm; còn EDIS là giải pháp số hóa hiện đại tích hợp OCR tự động",
+                "C. EDIS không hỗ trợ tra cứu văn bản",
+                "D. SMS chỉ dùng cho doanh nghiệp tư nhân"
+              ],
+              "correct_answer": "B",
+              "explanation": "SMS là phần mềm quản lý kho lưu trữ truyền thống lâu năm nhập tay nhiều hơn, trong khi EDIS là nền tảng số hóa tự động hóa bằng công nghệ OCR."
+            },
+            {
+              "id": 34,
+              "software_code": "EDIS",
+              "question": "Công nghệ cốt lõi nào được tích hợp trong EDIS giúp bóc tách thông tin và siêu dữ liệu (Metadata) tự động từ file scan?",
+              "options": [
+                "A. Công nghệ Blockchain",
+                "B. Công nghệ nhận dạng quang học OCR",
+                "C. Công nghệ VR 3D",
+                "D. Công nghệ IoT"
+              ],
+              "correct_answer": "B",
+              "explanation": "EDIS tích hợp công nghệ OCR tự động nhận dạng chữ viết và bóc tách siêu dữ liệu (Metadata) giúp giảm 95% thời gian tìm kiếm."
+            },
+            {
+              "id": 35,
+              "software_code": "EDIS",
+              "question": "Quy trình số hóa khép kín 6 bước trên hệ thống EDIS bao gồm thứ tự nào sau đây?",
+              "options": [
+                "A. Quét tài liệu -> Nhập thông tin (OCR) -> Chuẩn hóa -> Kiểm tra QC -> Ký số & Đóng gói -> Lưu trữ & Tra cứu",
+                "B. Ký số -> Quét tài liệu -> Kiểm tra QC -> Đóng gói -> Nhập thông tin",
+                "C. Lập kế hoạch -> In giấy -> Lưu kho -> Mượn trả",
+                "D. Quét tài liệu -> Lưu trữ -> Ký số -> Sửa lỗi"
+              ],
+              "correct_answer": "A",
+              "explanation": "Quy trình EDIS tiêu chuẩn gồm 6 bước: Quét -> Nhập metadata (OCR) -> Chuẩn hóa -> Kiểm tra QC -> Ký số xác thực & Đóng gói -> Lưu trữ & Tra cứu."
+            },
+            {
+              "id": 36,
+              "software_code": "EDIS",
+              "question": "Khâu Kiểm tra chất lượng (QC) trong hệ thống EDIS đóng vai trò gì?",
+              "options": [
+                "A. Kiểm tra xem cán bộ có đi làm đúng giờ không",
+                "B. Kiểm duyệt gắt gao chất lượng file scan và metadata của từng hồ sơ trước khi chính thức lưu kho",
+                "C. Tự động gửi Email thông báo cho phụ huynh",
+                "D. Xóa các file có dung lượng lớn"
+              ],
+              "correct_answer": "B",
+              "explanation": "Khâu QC của EDIS thực hiện kiểm duyệt gắt gao chất lượng hình ảnh và thông tin bóc tách để đảm bảo độ chính xác tuyệt đối."
+            },
+            {
+              "id": 37,
+              "software_code": "STTECH-ALL",
+              "question": "Điểm chung về kiến trúc hạ tầng kỹ thuật của hầu hết các phần mềm trong hệ sinh thái STTech là gì?",
+              "options": [
+                "A. Bắt buộc phải cài đặt phần mềm trên từng máy tính",
+                "B. Hoạt động trên nền tảng Web Cloud, hỗ trợ Responsive, đăng nhập 1 lần (SSO) và mỗi đơn vị có CSDL riêng biệt",
+                "C. Dùng chung 1 CSDL duy nhất cho tất cả các tỉnh thành",
+                "D. Chỉ chạy được trên hệ điều hành Windows XP"
+              ],
+              "correct_answer": "B",
+              "explanation": "Toàn bộ giải pháp STTech chạy trên Web Cloud, không cần cài đặt, hỗ trợ SSO, kho CSDL riêng biệt cho từng đơn vị để đảm bảo an toàn."
+            },
+            {
+              "id": 38,
+              "software_code": "STTECH-ALL",
+              "question": "Phần mềm nào đóng vai trò quản lý Cấp phôi bằng và xác minh chống bằng giả cho Sở/Phòng GD&ĐT?",
+              "options": [
+                "A. ST-AMS",
+                "B. ST-DMS",
+                "C. ST-SMS",
+                "D. ST-LIB"
+              ],
+              "correct_answer": "B",
+              "explanation": "ST-DMS là Phần mềm Quản lý, cấp phát và xác minh văn bằng chứng chỉ."
+            },
+            {
+              "id": 39,
+              "software_code": "STTECH-ALL",
+              "question": "Sự khác biệt rõ nhất giữa ST-EMS và ST-ETEST là gì?",
+              "options": [
+                "A. EMS là quản lý học trực tuyến & lớp học ảo; ETEST chuyên sâu về ngân hàng câu hỏi, ma trận đề & trộn đề thi",
+                "B. ETEST dành cho phụ huynh, EMS dành cho BGH",
+                "C. EMS không có chức năng kiểm tra trực tuyến",
+                "D. ETEST chỉ dùng để đánh giá giáo viên"
+              ],
+              "correct_answer": "A",
+              "explanation": "EMS là nền tảng quản lý dạy học trực tuyến và lớp học ảo Meeting Online; ETEST là hệ thống chuyên sâu về xây dựng ngân hàng đề, ma trận đề và trộn đề."
+            },
+            {
+              "id": 40,
+              "software_code": "STTECH-ALL",
+              "question": "Hệ thống nào giúp Lãnh đạo Sở/Phòng GD&ĐT theo dõi tiến độ và xếp hạng Mức độ Chuyển đổi số của toàn bộ trường học trên địa bàn?",
+              "options": [
+                "A. ST-BHR",
+                "B. DTI (Hệ thống Đánh giá chuyển đổi số)",
+                "C. ST-AMS",
+                "D. EDIS"
+              ],
+              "correct_answer": "B",
+              "explanation": "DTI là Nền tảng đánh giá Chuyển đổi số ngành Giáo dục cấp tỉnh, giúp lãnh đạo theo dõi Dashboard xếp hạng CĐS thời gian thực."
+            }
+        ];
+
+        let currentIndex = 0;
+        let userScore = 0;
+        let isAnswered = false;
+
+        const screenQuiz = document.getElementById('quiz-screen');
+        const screenResult = document.getElementById('result-screen');
+        const textQ = document.getElementById('q-text');
+        const boxOptions = document.getElementById('options-box');
+        const badgeSoft = document.getElementById('soft-badge');
+        const textProgress = document.getElementById('progress-text');
+        const textScore = document.getElementById('score-text');
+        const barProgress = document.getElementById('progress-bar');
+        const boxExplain = document.getElementById('explain-box');
+        const textExplain = document.getElementById('explain-text');
+        const btnNext = document.getElementById('next-btn');
+
+        function initQuiz() {
+            document.getElementById('main-desc').innerText = "Học phần ôn tập nhận diện tính năng, mã cốt lõi và căn cứ pháp lý.";
+            currentIndex = 0;
+            userScore = 0;
+            isAnswered = false;
+            screenQuiz.style.display = 'block';
+            screenResult.style.display = 'none';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            boxExplain.style.display = 'none';
+            btnNext.style.display = 'none';
+
+            let currentData = quizData[currentIndex];
+
+            textProgress.innerText = `Câu hỏi ${currentIndex + 1}/${quizData.length}`;
+            textScore.innerText = `Đúng: ${userScore}`;
+            barProgress.style.width = `${((currentIndex) / quizData.length) * 100}%`;
+
+            badgeSoft.innerText = currentData.software_code;
+            textQ.innerText = currentData.question;
+
+            boxOptions.innerHTML = '';
+            currentData.options.forEach((opt) => {
+                let prefix = opt.charAt(0);
+                let text = opt.substring(3);
+                let card = document.createElement('div');
+                card.className = 'option-card';
+                card.innerHTML = `<span class="option-prefix">${prefix}</span> <span class="option-text-val">${text}</span>`;
+                card.setAttribute('data-ans', prefix);
+                card.onclick = function() { checkAnswer(card, prefix, currentData.correct_answer, currentData.explanation); };
+                boxOptions.appendChild(card);
+            });
+        }
+
+        function checkAnswer(selectedCard, userAns, correctAns, explainText) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            let cards = boxOptions.querySelectorAll('.option-card');
+            cards.forEach(c => c.classList.add('disabled'));
+
+            if (userAns === correctAns) {
+                selectedCard.classList.add('correct');
+                userScore++;
+                textScore.innerText = `Đúng: ${userScore}`;
+            } else {
+                selectedCard.classList.add('incorrect');
+                cards.forEach(c => {
+                    if (c.getAttribute('data-ans') === correctAns) {
+                        c.classList.add('correct');
+                    }
+                });
+            }
+
+            textExplain.innerText = explainText;
+            boxExplain.style.display = 'block';
+            
+            if(currentIndex === quizData.length - 1) {
+                btnNext.innerHTML = `Xem Kết Quả Tổng Kết <i class="fa-solid fa-square-poll-vertical"></i>`;
+            } else {
+                btnNext.innerHTML = `Câu Tiếp Theo <i class="fa-solid fa-arrow-right"></i>`;
+            }
+            btnNext.style.display = 'block';
+        }
+
+        function handleNextStep() {
+            if (currentIndex < quizData.length - 1) {
+                currentIndex++;
+                loadQuestion();
+            } else {
+                showFinalResult();
+            }
+        }
+
+        function showFinalResult() {
+            screenQuiz.style.display = 'none';
+            screenResult.style.display = 'block';
+            barProgress.style.width = '100%';
+            document.getElementById('final-score').innerText = `${userScore}/${quizData.length}`;
+            
+            let comment = "";
+            let percent = (userScore / quizData.length) * 100;
+            if(percent === 100) { 
+                comment = "Xuất sắc tuyệt đối! Bạn đã làm chủ hoàn toàn hệ sinh thái phần mềm STTech!"; 
+                launchConfetti(); 
+            } else if(percent >= 80) { 
+                comment = "Quá đỉnh! Kiến thức của bạn cực kỳ vững vàng đấy!"; 
+                launchConfetti(); 
+            } else if(percent >= 50) { 
+                comment = "Khá tốt! Đọc kỹ giải thích thêm một chút là hoàn hảo ngay."; 
+            } else { 
+                comment = "Đừng nản lòng nhé! Hãy thử làm lại lần nữa để ghi nhớ tốt hơn."; 
+            }
+            document.getElementById('final-comment').innerText = comment;
+        }
+
+        function launchConfetti() {
+            if (typeof confetti === 'function') {
+                var duration = 3 * 1000;
+                var end = Date.now() + duration;
+                (function frame() {
+                    confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0, y: 0.85 } });
+                    confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1, y: 0.85 } });
+                    if (Date.now() < end) { requestAnimationFrame(frame); }
+                }());
+            }
+        }
+
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STTech Master Quiz - 30 Câu Trắc Nghiệm Hóc Búa</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 750px;
+            padding: 30px;
+            box-sizing: border-box;
+            border: 1px solid #334155;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+
+        .score-board {
+            font-size: 0.95rem;
+            background: #0f172a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #334155;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #334155;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: #0f172a;
+            border: 1.5px solid #334155;
+            color: var(--text-main);
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 0.98rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--accent-blue);
+            background-color: #1e293b;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background-color: #064e3b !important;
+            border-color: var(--accent-green) !important;
+            color: #a7f3d0 !important;
+        }
+
+        .option-btn.incorrect {
+            background-color: #7f1d1d !important;
+            border-color: var(--accent-red) !important;
+            color: #fecaca !important;
+        }
+
+        .explanation-box {
+            background-color: #0f172a;
+            border-left: 4px solid var(--accent-blue);
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            color: var(--text-sub);
+            margin-top: 15px;
+            display: none;
+        }
+
+        .next-btn {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            float: right;
+            display: none;
+        }
+
+        .next-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent-green);
+            margin: 15px 0;
+        }
+
+        .restart-btn {
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="quiz-screen">
+        <div class="quiz-header">
+            <div class="quiz-title">STTech Product Master Quiz</div>
+            <div class="score-board">Câu <span id="current-q">1</span>/30 | Điểm: <span id="current-score">0</span></div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="question-text" id="question-text">Loading question...</div>
+        <div class="options-grid" id="options-grid"></div>
+        <div class="explanation-box" id="explanation-box"></div>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">Câu tiếp theo ➔</button>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h2>🎉 HOÀN THÀNH BÀI KIỂM TRA!</h2>
+        <p>Bạn đã hoàn thành bộ 30 câu hỏi hóc búa về 15 phần mềm STTech.</p>
+        <div class="result-score"><span id="final-score">0</span> / 30</div>
+        <p id="result-comment"></p>
+        <button class="restart-btn" onclick="restartQuiz()">Làm lại bài thi (Trộn câu hỏi mới)</button>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    {
+        q: "Tên viết tắt 'ST-DMS' trong hệ sinh thái phần mềm STTech đại diện cho tên tiếng Anh và tên đầy đủ tiếng Việt nào sau đây?",
+        options: [
+            "A. Document Management System - Phần mềm Quản lý văn bản điện tử",
+            "B. Diploma Management System - Phần mềm Quản lý, cấp phát văn bằng chứng chỉ",
+            "C. Data Mining System - Hệ thống Phân tích dữ liệu giáo dục",
+            "D. Digital Media System - Phần mềm Quản lý truyền thông số"
+        ],
+        answer: 1,
+        exp: "<b>ST-DMS</b> là viết tắt của <i>Diploma Management System</i> - Phần mềm Quản lý, cấp phát văn bằng chứng chỉ, phục vụ quy trình xét tốt nghiệp, cấp phôi bằng, in bằng và tra cứu bản sao trực tuyến."
+    },
+    {
+        q: "Phần mềm nào sau đây có tên tiếng Việt là 'Hệ thống số hóa & Quản lý dữ liệu hồ sơ lưu trữ'?",
+        options: [
+            "A. ST-SMS",
+            "B. EDIS",
+            "C. DTI",
+            "D. ST-LIB"
+        ],
+        answer: 1,
+        exp: "<b>EDIS</b> (Electronic Document Archiving & Digitization Information System) là Hệ thống số hóa & Quản lý dữ liệu hồ sơ lưu trữ, tích hợp công nghệ quét OCR, ký số xác thực và đóng gói tự động."
+    },
+    {
+        q: "Tên gọi 'ST-TMIS' viết tắt từ cụm từ gốc tiếng Anh nào?",
+        options: [
+            "A. Teacher & Management Information System",
+            "B. Total Management Instruction System",
+            "C. Training & Monitoring Inspection Software",
+            "D. Technical Measurement Integration System"
+        ],
+        answer: 0,
+        exp: "<b>ST-TMIS</b> viết tắt của <i>Teacher & Management Information System</i> - Phần mềm Đánh giá chuẩn hiệu trưởng, chuẩn nghề nghiệp giáo viên và Đánh giá cán bộ, công chức, viên chức."
+    },
+    {
+        q: "Ứng dụng nào dưới đây là 'Phần mềm Quản lý tuyển sinh đầu cấp'?",
+        options: [
+            "A. ST-EMS",
+            "B. ST-AMS",
+            "C. ST-SMS",
+            "D. ST-BHR"
+        ],
+        answer: 1,
+        exp: "<b>ST-AMS</b> (Admission Management System) là Phần mềm Quản lý tuyển sinh đầu cấp, hỗ trợ phân tuyến theo địa bàn thôn/ấp, xét tuyển tự động và nhận lịch hẹn trực tuyến."
+    },
+    {
+        q: "Mã viết tắt 'DTI' đại diện cho hệ thống nào của STTech?",
+        options: [
+            "A. Digital Teacher Inspection - Kiểm tra giáo viên số",
+            "B. Digital Transformation Index - Hệ thống Đánh giá chuyển đổi số ngành Giáo dục",
+            "C. Data Transfer Interface - Giao diện chuyển giao dữ liệu",
+            "D. District Technical Infrastructure - Hạ tầng kỹ thuật cấp huyện"
+        ],
+        answer: 1,
+        exp: "<b>DTI</b> là <i>Digital Transformation Index</i> - Hệ thống Đánh giá chuyển đổi số ngành Giáo dục, thực hiện bộ tiêu chí theo QĐ 3806, QĐ 4725 và QĐ 3276 của Bộ GD&ĐT."
+    },
+    {
+        q: "Sự khác biệt cốt lõi về tên gọi và chức năng giữa 'ST-SMS' và 'EDIS' là gì?",
+        options: [
+            "A. ST-SMS quản lý tuyển sinh; EDIS quản lý bằng cấp.",
+            "B. ST-SMS là Quản lý kho hồ sơ lưu trữ (vật lý & điện tử); EDIS là Hệ thống số hóa chuyên sâu (quét OCR, ký số, đóng gói).",
+            "C. ST-SMS dành cho Trường học; EDIS dành cho Sở Tài chính.",
+            "D. Hai phần mềm này là một, chỉ khác tên do năm phát hành."
+        ],
+        answer: 1,
+        exp: "<b>ST-SMS</b> (Storage Management System) quản lý kho lưu trữ vật lý/điện tử & quy trình mượn/trả. Trong khi <b>EDIS</b> là giải pháp số hóa chuyên sâu áp dụng OCR, QC và ký số bản sao pháp lý."
+    },
+    {
+        q: "Tên gọi 'ST-BHR' liên quan đến mảng nghiệp vụ quản trị nào?",
+        options: [
+            "A. Báo cáo học sinh giỏi và khen thưởng",
+            "B. Quản lý hồ sơ - Cảnh báo nâng bậc lương - Đánh giá cán bộ, công chức, viên chức",
+            "C. Biên mục thư viện và mã hóa Cutter",
+            "D. Bảng chấm công tự động qua nhận diện khuôn mặt"
+        ],
+        answer: 1,
+        exp: "<b>ST-BHR</b> (Bureaucracy/Board Human Resources) là Phần mềm Quản lý hồ sơ, Cảnh báo nâng bậc lương tự động qua Email và Đánh giá cán bộ, công chức, viên chức."
+    },
+    {
+        q: "Phần mềm nào có chức năng chính là 'Quản lý ngân hàng đề thi trực tuyến' và hỗ trợ trộn đề tổ hợp?",
+        options: [
+            "A. ST-EMS",
+            "B. ST-ETEST",
+            "C. EDU",
+            "D. QA"
+        ],
+        answer: 1,
+        exp: "<b>ST-ETEST</b> (E-Test) là Phần mềm Quản lý ngân hàng đề thi trực tuyến Etech, hỗ trợ ma trận đề thi, phát hiện lỗi file Word và trộn đề tổ hợp đa môn."
+    },
+    {
+        q: "Cụm từ 'ST-EMS' là viết tắt của ứng dụng nào?",
+        options: [
+            "A. Educational Examination Management Software",
+            "B. Educational Management System (Quản lý giáo dục & Dạy học trực tuyến)",
+            "C. Emergency Medical System in Schools",
+            "D. Enterprise Resource Management System"
+        ],
+        answer: 1,
+        exp: "<b>ST-EMS</b> là Educational Management System - Phần mềm Quản lý giáo dục và Dạy học trực tuyến, tích hợp lớp học ảo Meeting Online và bài giảng SCORM."
+    },
+    {
+        q: "Phần mềm 'HRS' khác gì với 'ST-BHR' trong nhóm quản lý nhân sự?",
+        options: [
+            "A. HRS quản lý thư viện; ST-BHR quản lý điểm số.",
+            "B. HRS chuyên sâu về Quản lý nhân sự, tiền lương và dự toán chi trả lương; ST-BHR tập trung vào hồ sơ, cảnh báo nâng lương và biểu mẫu 2C.",
+            "C. HRS chỉ dành cho học sinh; ST-BHR dành cho giáo viên.",
+            "D. Hai phần mềm hoàn toàn giống nhau."
+        ],
+        answer: 1,
+        exp: "<b>HRS</b> (Human Resource System) tập trung vào tính lương chi tiết và lập dự toán chi trả lương. <b>ST-BHR</b> tập trung vào quản lý lý lịch hồ sơ 2C/HS02 và cảnh báo nâng lương ngạch bậc."
+    },
+    {
+        q: "Mã phần mềm 'ST-CEMS' viết tắt của tên tiếng Việt đầy đủ nào?",
+        options: [
+            "A. Phần mềm Quản lý cơ sở vật chất và thiết bị trường học",
+            "B. Phần mềm Đánh giá chuẩn hiệu trưởng, chuẩn nghề nghiệp giáo viên",
+            "C. Phần mềm Cam kết chất lượng giáo dục mầm non",
+            "D. Phần mềm Cấp phát chỉ tiêu tuyển sinh"
+        ],
+        answer: 1,
+        exp: "<b>ST-CEMS</b> là Phần mềm Đánh giá chuẩn hiệu trưởng, chuẩn nghề nghiệp giáo viên, có tính năng đặc thù là thống kê và gợi ý danh sách giáo viên cốt cán địa phương."
+    },
+    {
+        q: "Phần mềm 'ST-LIB' đại diện cho giải pháp nào của STTech?",
+        options: [
+            "A. Thư viện số & Quản lý thư viện trường học",
+            "B. Lịch công tác và Bán hàng trực tuyến",
+            "C. Luân chuyển hồ sơ công văn",
+            "D. Lớp học tương tác thông minh"
+        ],
+        answer: 0,
+        exp: "<b>ST-LIB</b> (Library Management System) là Thư viện số & Quản lý thư viện trường học, có tính năng đọc sách 3D, biên mục Cutter/DDC và liên thông tự đánh giá thư viện TT 16."
+    },
+    {
+        q: "Phần mềm nào có tên gọi gắn liền với 'Nghị định 90/2020/NĐ-CP' và 'Nghị định 48/2023/NĐ-CP' về đánh giá hiệu suất?",
+        options: [
+            "A. ST-KPI",
+            "B. ST-LIB",
+            "C. ST-AMS",
+            "D. EDIS"
+        ],
+        answer: 0,
+        exp: "<b>ST-KPI</b> là Phần mềm Đánh giá xếp loại chất lượng tập thể và cá nhân công chức, viên chức theo Nghị định 90/2020 và Nghị định 48/2023."
+    },
+    {
+        q: "Tên viết tắt 'QA' trong bảng danh mục sản phẩm STTech đại diện cho phần mềm nào?",
+        options: [
+            "A. Phần mềm Quản lý kho tàng (Quality Administration)",
+            "B. Phần mềm Kiểm định chất lượng giáo dục (Quality Assurance)",
+            "C. Phần mềm Quản lý tài chính (Quantitative Analysis)",
+            "D. Phần mềm Hỏi đáp tự động (Question & Answer)"
+        ],
+        answer: 1,
+        exp: "<b>QA</b> viết tắt từ <i>Quality Assurance</i> - Phần mềm Kiểm định chất lượng giáo dục trong các cơ sở giáo dục."
+    },
+    {
+        q: "Cổng thông tin tích hợp 'Trợ lý AI' tự động tư vấn thủ tục hành chính và công khai giáo dục theo TT 09/2024 có tên là gì?",
+        options: [
+            "A. ST-EMS",
+            "B. EDU (EduPortal AI)",
+            "C. DTI",
+            "D. ST-LIB"
+        ],
+        answer: 1,
+        exp: "<b>EDU (EduPortal AI)</b> là Cổng thông tin điện tử Giáo dục, tích hợp Trợ lý AI giải đáp tuyển sinh, học bạ số và công khai 5 nội dung theo Thông tư 09/2024/TT-BGDĐT."
+    },
+    {
+        q: "Nếu sếp hỏi: 'Phần mềm nào xử lý quy trình cấp bản sao bằng tốt nghiệp trực tuyến đáp ứng Dịch vụ công mức 3-4?', bạn sẽ trả lời mã phần mềm nào?",
+        options: [
+            "A. ST-AMS",
+            "B. ST-DMS",
+            "C. EDIS",
+            "D. ST-SMS"
+        ],
+        answer: 1,
+        exp: "Đó là <b>ST-DMS</b>. Phân hệ Cấp bản sao trực tuyến của ST-DMS cho phép người dân đăng ký hồ sơ trực tuyến, Phòng GD&ĐT tự động duyệt cấp số và trả kết quả qua Email."
+    },
+    {
+        q: "Điểm biệt định rõ nhất giữa 'ST-TMIS' và 'ST-CEMS' là gì?",
+        options: [
+            "A. ST-TMIS gộp chung quy trình đánh giá Chuẩn nghề nghiệp VÀ Đánh giá công chức/viên chức theo NĐ 90; còn ST-CEMS tập trung chuyên sâu Chuẩn hiệu trưởng/Chuẩn nhà giáo.",
+            "B. ST-TMIS dành cho học sinh; ST-CEMS dành cho phụ huynh.",
+            "C. ST-TMIS là phần mềm quản lý học phí; ST-CEMS là phần mềm quản lý xe bus.",
+            "D. Hai phần mềm hoàn toàn giống hệt nhau về mọi chức năng."
+        ],
+        answer: 0,
+        exp: "<b>ST-TMIS</b> có phạm vi rộng hơn khi tích hợp cả đánh giá Chuẩn nghề nghiệp nhà giáo (TT 14,20,25,26) lẫn Đánh giá công chức/viên chức theo Nghị định 90. <b>ST-CEMS</b> chuyên sâu về Chuẩn nhà giáo & quy hoạch GV cốt cán."
+    },
+    {
+        q: "Tên gọi 'Admission Management System' tương ứng với mã viết tắt nào?",
+        options: [
+            "A. ST-AMS",
+            "B. ST-EMS",
+            "C. ST-DMS",
+            "D. ST-SMS"
+        ],
+        answer: 0,
+        exp: "<b>ST-AMS</b> chính là <i>Admission Management System</i> - Hệ thống Quản lý tuyển sinh đầu cấp."
+    },
+    {
+        q: "Phần mềm nào hỗ trợ 'Biên mục DDC/Cutter' và 'Đọc sách 3D lật trang'?",
+        options: [
+            "A. ST-LIB",
+            "B. ST-EMS",
+            "C. EDIS",
+            "D. ST-ETEST"
+        ],
+        answer: 0,
+        exp: "Đó là <b>ST-LIB</b> (Thư viện số & Quản lý thư viện trường học)."
+    },
+    {
+        q: "Hệ thống nào thực hiện đánh giá Chuyển đổi số theo quy trình 4 bước (Tự đánh giá -> Thẩm định -> Công nhận -> Đồng bộ CSDL Bộ)?",
+        options: [
+            "A. DTI",
+            "B. QA",
+            "C. ST-KPI",
+            "D. EDIS"
+        ],
+        answer: 0,
+        exp: "Đó là <b>DTI</b> (Hệ thống Đánh giá chuyển đổi số ngành Giáo dục)."
+    },
+    {
+        q: "Mã phần mềm 'ST-SMS' viết tắt từ cụm từ tiếng Anh nào?",
+        options: [
+            "A. Short Message Service",
+            "B. Storage Management System",
+            "C. School Management Software",
+            "D. Student Monitoring System"
+        ],
+        answer: 1,
+        exp: "Trong hệ sinh thái STTech, <b>ST-SMS</b> là <i>Storage Management System</i> - Phần mềm Quản lý hồ sơ lưu trữ."
+    },
+    {
+        q: "Phần mềm nào tự động cảnh báo danh sách cán bộ đến hạn nâng lương qua Email cho cấp quản lý?",
+        options: [
+            "A. ST-BHR",
+            "B. HRS",
+            "C. ST-KPI",
+            "D. ST-TMIS"
+        ],
+        answer: 0,
+        exp: "Đó là tính năng cốt lõi của <b>ST-BHR</b> (Phần mềm Quản lý hồ sơ – Cảnh báo nâng bậc lương)."
+    },
+    {
+        q: "Để chấm điểm đánh giá hiệu suất công việc cán bộ theo Nghị định 90/2020 và hiển thị Dashboard biểu đồ tròn tỷ lệ xếp loại, ta dùng phần mềm nào?",
+        options: [
+            "A. ST-KPI",
+            "B. ST-LIB",
+            "C. ST-AMS",
+            "D. ST-EMS"
+        ],
+        answer: 0,
+        exp: "Đó là <b>ST-KPI</b> (Phần mềm Đánh giá xếp loại chất lượng tập thể và cá nhân công chức, viên chức)."
+    },
+    {
+        q: "Hệ thống nào có chức năng bóc tách siêu dữ liệu (Metadata) tự động bằng công nghệ OCR và ký số bản sao điện tử?",
+        options: [
+            "A. EDIS",
+            "B. ST-SMS",
+            "C. ST-DMS",
+            "D. DTI"
+        ],
+        answer: 0,
+        exp: "Đó là <b>EDIS</b> (Hệ thống số hóa & Quản lý dữ liệu hồ sơ lưu trữ)."
+    },
+    {
+        q: "Phần mềm 'ST-ETEST' phục vụ chính cho đối tượng và công việc nào?",
+        options: [
+            "A. Học sinh đăng ký tuyển sinh lớp 1",
+            "B. Cán bộ quản lý thư viện mượn trả sách",
+            "C. Giáo viên & Chuyên môn tạo ngân hàng câu hỏi, ma trận đề thi và trộn đề thi",
+            "D. Kế toán tính lương và lập dự toán chi trả"
+        ],
+        answer: 2,
+        exp: "<b>ST-ETEST</b> phục vụ giáo viên và cán bộ chuyên môn xây dựng ngân hàng câu hỏi, tạo ma trận đề thi và xuất đề thi tổ hợp."
+    },
+    {
+        q: "Sản phẩm nào liên thông trực tiếp dữ liệu lượt mượn/đọc sách vào Báo cáo tự đánh giá đạt chuẩn theo Thông tư 16/2022/TT-BGDĐT?",
+        options: [
+            "A. ST-LIB",
+            "B. ST-DMS",
+            "C. DTI",
+            "D. QA"
+        ],
+        answer: 0,
+        exp: "<b>ST-LIB</b> tích hợp sẵn phân hệ Đánh giá thư viện đạt chuẩn, tự động lấy số liệu liên thông từ phân hệ quản lý mượn/trả sách."
+    },
+    {
+        q: "Tên tiếng Việt của 'HRS' là gì?",
+        options: [
+            "A. Phần mềm Quản lý nhân sự, quản lý tiền lương và dự toán chi trả lương",
+            "B. Hệ thống Đánh giá công chức viên chức hàng năm",
+            "C. Phần mềm Cảnh báo nghỉ hưu và nâng ngạch",
+            "D. Hệ thống Lưu trữ hồ sơ cán bộ ngành giáo dục"
+        ],
+        answer: 0,
+        exp: "<b>HRS</b> (Human Resource System) là Phần mềm Quản lý nhân sự, quản lý tiền lương và dự toán chi trả lương."
+    },
+    {
+        q: "Hệ thống nào giúp Phòng GD&ĐT tự động thẩm định chỉ số Chuyển đổi số của các trường mầm non theo Quyết định 3276/QĐ-BGDĐT?",
+        options: [
+            "A. DTI",
+            "B. ST-EMS",
+            "C. QA",
+            "D. ST-AMS"
+        ],
+        answer: 0,
+        exp: "<b>DTI</b> quản lý bộ tiêu chí CĐS cấp mầm non theo QĐ 3276/QĐ-BGDĐT."
+    },
+    {
+        q: "Phần mềm 'ST-EMS' cung cấp tính năng nổi bật nào cho việc giảng dạy trực tuyến?",
+        options: [
+            "A. In phích cá biệt và Sổ cá biệt",
+            "B. Lớp học ảo Meeting Online (bảng trắng, điểm danh tự động, quay bài giảng)",
+            "C. Rà soát danh sách học sinh trúng tuyển đầu cấp",
+            "D. In sổ gốc văn bằng tốt nghiệp"
+        ],
+        answer: 1,
+        exp: "<b>ST-EMS</b> tích hợp lớp học ảo Meeting Online hỗ trợ tương tác thời gian thực, bảng trắng, điểm danh tự động và quay bài giảng."
+    },
+    {
+        q: "Tổng cộng trong Bức tranh tổng thể Hệ sinh thái STTech có bao nhiêu phần mềm/giải pháp cốt lõi?",
+        options: [
+            "A. 10 phần mềm",
+            "B. 12 phần mềm",
+            "C. 15 phần mềm",
+            "D. 20 phần mềm"
+        ],
+        answer: 2,
+        exp: "Hệ sinh thái STTech bao gồm đầy đủ <b>15 phần mềm/giải pháp</b> chia làm 4 trụ cột nghiệp vụ."
+    }
+];
+
+let currentQ = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    const qData = quizData[currentQ];
+    document.getElementById("current-q").innerText = currentQ + 1;
+    document.getElementById("current-score").innerText = score;
+    document.getElementById("question-text").innerText = `Câu ${currentQ + 1}: ${qData.q}`;
+    
+    const progressPercent = ((currentQ + 1) / quizData.length) * 100;
+    document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+
+    const optionsGrid = document.getElementById("options-grid");
+    optionsGrid.innerHTML = "";
+
+    qData.options.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerText = opt;
+        btn.onclick = () => selectOption(idx);
+        optionsGrid.appendChild(btn);
+    });
+
+    document.getElementById("explanation-box").style.display = "none";
+    document.getElementById("next-btn").style.display = "none";
+}
+
+function selectOption(index) {
+    if (answered) return;
+    answered = true;
+
+    const qData = quizData[currentQ];
+    const buttons = document.querySelectorAll(".option-btn");
+
+    buttons.forEach((btn) => btn.disabled = true);
+
+    if (index === qData.answer) {
+        buttons[index].classList.add("correct");
+        score++;
+        document.getElementById("current-score").innerText = score;
+    } else {
+        buttons[index].classList.add("incorrect");
+        buttons[qData.answer].classList.add("correct");
+    }
+
+    const expBox = document.getElementById("explanation-box");
+    expBox.innerHTML = `💡 <b>Ghi nhớ / Chú thích:</b> ${qData.exp}`;
+    expBox.style.display = "block";
+
+    document.getElementById("next-btn").style.display = "block";
+}
+
+function nextQuestion() {
+    currentQ++;
+    if (currentQ < quizData.length) {
+        loadQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    document.getElementById("quiz-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+    document.getElementById("final-score").innerText = score;
+
+    let comment = "";
+    if (score === 30) comment = "🔥 XUẤT SẮC TẬP TRUNG! Bạn đã thuộc lòng 100% tên viết tắt và chức năng của 15 phần mềm STTech!";
+    else if (score >= 24) comment = "👏 RẤT TỐT! Bạn đã nắm vững trên 80% kiến thức. Hãy làm lại 1 lần nữa để đạt điểm tuyệt đối!";
+    else if (score >= 18) comment = "👍 KHÁ TỐT! Bạn đã nhớ được các ứng dụng chính, cần rèn luyện thêm các cặp tên dễ nhầm lẫn.";
+    else comment = "💪 CỐ LÊN! Đọc lại Mẹo ghi nhớ 4 cụm từ gốc và làm lại bài thi để ghi nhớ sâu hơn nhé!";
+
+    document.getElementById("result-comment").innerText = comment;
+}
+
+function restartQuiz() {
+    currentQ = 0;
+    score = 0;
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("quiz-screen").style.display = "block";
+    loadQuestion();
+}
+
+// Khởi chạy câu hỏi đầu tiên khi tải trang
+loadQuestion();
+</script>
+</body>
+</html>
