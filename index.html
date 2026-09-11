@@ -3,30 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Ôn Tập STTech</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <title>STTech Ecosystem Master Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <style>
-        * { box-sizing: border-box; font-family: 'Quicksand', sans-serif; }
-        body { background: #1e1b4b; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .card { background: white; padding: 40px 30px; border-radius: 20px; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        h1 { color: #4338ca; margin-top: 0; font-size: 1.8rem; }
-        p { color: #6b7280; margin-bottom: 30px; }
-        .btn-group { display: flex; flex-direction: column; gap: 15px; }
-        .btn { display: block; padding: 16px 20px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.05rem; transition: all 0.2s; }
-        .btn-detail { background: #6366f1; color: white; border-bottom: 4px solid #4338ca; }
-        .btn-detail:hover { background: #4f46e5; }
-        .btn-name { background: #0ea5e9; color: white; border-bottom: 4px solid #0369a1; }
-        .btn-name:hover { background: #0284c7; }
+        :root {
+            --bg: #0b0f19;
+            --card-bg: rgba(22, 30, 49, 0.85);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        * { box-sizing: border-box; font-family: 'Quicksand', sans-serif; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        body {
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 70%);
+            margin: 0; padding: 30px 15px; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; color: var(--text-main);
+        }
+
+        .hub-container {
+            max-width: 900px; width: 100%;
+            background: var(--card-bg); backdrop-filter: blur(16px);
+            border-radius: 28px; padding: 40px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.15);
+        }
+
+        .header-title { text-align: center; margin-bottom: 35px; }
+        .header-title h1 {
+            font-family: 'Fredoka One', cursive; font-size: 2.3rem; margin: 0;
+            background: linear-gradient(135deg, #a5b4fc, #6366f1, #38bdf8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        .header-title p { color: var(--text-sub); margin-top: 8px; font-size: 1rem; }
+
+        /* Grid Menu 3D */
+        .grid-modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-bottom: 25px; }
+        .card-3d {
+            background: #131b2e; border: 1px solid #23304d; border-radius: 18px;
+            padding: 20px; text-decoration: none; color: var(--text-main);
+            display: flex; flex-direction: column; justify-content: space-between;
+            box-shadow: 0 8px 0 #0d121f, 0 15px 20px rgba(0,0,0,0.4);
+            transform: translateY(0); cursor: pointer;
+        }
+        .card-3d:hover {
+            transform: translateY(-5px); border-color: var(--primary);
+            box-shadow: 0 13px 0 #0d121f, 0 20px 25px var(--primary-glow);
+        }
+        .card-3d:active { transform: translateY(3px); box-shadow: 0 3px 0 #0d121f; }
+        .card-icon { font-size: 1.8rem; margin-bottom: 12px; }
+        .card-name { font-size: 1.05rem; font-weight: 800; line-height: 1.4; }
+        .card-desc { font-size: 0.82rem; color: var(--text-sub); margin-top: 6px; }
+
+        /* Nút Chế độ Tổng Hợp 3D Độc Lập */
+        .btn-super-random {
+            width: 100%; border: none; border-radius: 20px; padding: 22px;
+            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            color: white; font-size: 1.2rem; font-weight: 800; cursor: pointer;
+            box-shadow: 0 8px 0 #312e81, 0 15px 25px rgba(79, 70, 229, 0.4);
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+        }
+        .btn-super-random:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 11px 0 #312e81, 0 20px 30px rgba(79, 70, 229, 0.5); }
+        .btn-super-random:active { transform: translateY(4px); box-shadow: 0 2px 0 #312e81; }
+
+        /* Khung Thi Đề 7 (Ẩn mặc định) */
+        #quiz-sandbox { display: none; margin-top: 15px; }
+        .progress-bar { width: 100%; height: 10px; background: #1f293d; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #38bdf8); }
+        .q-box {
+            background: #111827; border: 1.5px solid #2d3748; border-radius: 16px;
+            padding: 22px; margin-bottom: 20px; text-align: center;
+        }
+        .q-text { font-size: 1.15rem; font-weight: 700; line-height: 1.55; }
+        .opts-grid { display: grid; gap: 12px; }
+        .opt-btn {
+            background: #1f293d; border: 2px solid #2d3748; color: #fff;
+            padding: 15px 20px; border-radius: 14px; text-align: left;
+            font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 #141b27;
+        }
+        .opt-btn:hover:not([disabled]) { border-color: var(--primary); transform: translateY(-2px); }
+        .opt-btn.correct { background: #064e3b !important; border-color: var(--success) !important; }
+        .opt-btn.incorrect { background: #7f1d1d !important; border-color: var(--danger) !important; }
+        .exp-box {
+            background: #1e1b4b; border-left: 4px solid var(--primary);
+            padding: 15px; border-radius: 8px; font-size: 0.95rem; line-height: 1.5;
+            color: #cbd5e1; margin-top: 18px; display: none;
+        }
+        .next-btn {
+            background: var(--primary); color: white; border: none; border-radius: 12px;
+            padding: 14px 28px; font-size: 1rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 5px 0 #4338ca; float: right; margin-top: 15px; display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Ôn Tập Hệ Sinh Thái STTech</h1>
-        <p>Chọn chế độ ôn tập phù hợp với nhu cầu của bạn:</p>
-        <div class="btn-group">
-            <a href="quiz.html" class="btn btn-detail">📋 Bản Chi Tiết (Tính Năng & Pháp Lý - 40 Câu)</a>
-            <a href="quiz_sttech.html" class="btn btn-name">🏷️ Bản Chỉ Tên & Mã Viết Tắt (30 Câu)</a>
+
+<div class="hub-container">
+    <!-- MÀN HÌNH CHỦ LỰA CHỌN -->
+    <div id="hub-menu">
+        <div class="header-title">
+            <h1>HỆ SINH THÁI KHẢO THÍ STTECH</h1>
+            <p>Chọn phân hệ bài thi riêng lẻ hoặc kích hoạt phòng luyện ngẫu nhiên</p>
         </div>
+
+        <div class="grid-modules">
+            <a href="quiz.html" class="card-3d">
+                <div>
+                    <div class="card-icon" style="color: #818cf8;"><i class="fa-solid fa-list-check"></i></div>
+                    <div class="card-name">1. Bản Đầy Đủ & Pháp Lý</div>
+                    <div class="card-desc">40 câu hỏi nền tảng, tính năng và quy chế pháp lý.</div>
+                </div>
+            </a>
+            <a href="quiz_sttech.html" class="card-3d">
+                <div>
+                    <div class="card-icon" style="color: #38bdf8;"><i class="fa-solid fa-tags"></i></div>
+                    <div class="card-name">2. Tên Gọi & Mã Viết Tắt</div>
+                    <div class="card-desc">30 câu luyện phản xạ tên tiếng Anh và từ viết tắt.</div>
+                </div>
+            </a>
+            <a href="quiz_de_nham_lan.html" class="card-3d">
+                <div>
+                    <div class="card-icon" style="color: #c084fc;"><i class="fa-solid fa-code-compare"></i></div>
+                    <div class="card-name">3. Cặp Đôi Dễ Nhầm Lẫn</div>
+                    <div class="card-desc">20 câu đối đầu ranh giới tính năng các phần mềm.</div>
+                </div>
+            </a>
+            <a href="quiz_lien_thong_du_lieu.html" class="card-3d">
+                <div>
+                    <div class="card-icon" style="color: #34d399;"><i class="fa-solid fa-network-wired"></i></div>
+                    <div class="card-name">4. Mạng Lưới Liên Thông</div>
+                    <div class="card-desc">20 câu luồng trao đổi dữ liệu nội bộ và CSDL Bộ.</div>
+                </div>
+            </a>
+            <a href="quiz_tinh_huong_thuc_te.html" class="card-3d">
+                <div>
+                    <div class="card-icon" style="color: #fbbf24;"><i class="fa-solid fa-briefcase"></i></div>
+                    <div class="card-name">5. Tình Huống Khách Hàng</div>
+                    <div class="card-desc">25 bài toán thực tiễn từ Sở, Phòng và Nhà trường.</div>
+                </div>
+            </a>
+            <a href="quiz_can_cu_phap_ly.html" class="card-3d">
+                <div>
+                    <div class="card-icon" style="color: #f472b6;"><i class="fa-solid fa-scale-balanced"></i></div>
+                    <div class="card-name">6. Căn Cứ Pháp Lý Chuyên Sâu</div>
+                    <div class="card-desc">30 câu hóc búa về Thông tư, Nghị định và Quyết định.</div>
+                </div>
+            </a>
+        </div>
+
+        <button class="btn-super-random" onclick="launchSuperQuiz()">
+            <i class="fa-solid fa-shuffle fa-spin"></i>
+            KÍCH HOẠT ĐỀ SỐ 7: THI ĐẤU TỔNG HỢP NGẪU NHIÊN (35 CÂU)
+        </button>
     </div>
+
+    <!-- PHÒNG THI ĐỀ SỐ 7 ĐỘC LẬP TỰ SINH -->
+    <div id="quiz-sandbox">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <button onclick="backToHub()" style="background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 6px 14px; border-radius: 8px; cursor: pointer;">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </button>
+            <div style="font-weight: 800; color: #38bdf8;">Đề Số 7: <span id="q-counter">0/0</span> | Đúng: <span id="score-counter">0</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
+        <div class="q-box">
+            <div class="q-text" id="sandbox-q">Đang bóc tách dữ liệu câu hỏi từ 6 bộ đề...</div>
+        </div>
+        <div class="opts-grid" id="sandbox-opts"></div>
+        <div class="exp-box" id="sandbox-exp"></div>
+        <button class="next-btn" id="sandbox-next" onclick="stepNextQuestion()">Câu Tiếp Theo ➔</button>
+    </div>
+</div>
+
+<script>
+let superQuestions = [];
+let curIdx = 0;
+let superScore = 0;
+let isAnswered = false;
+
+// Thuật toán quét và trích xuất quizData từ cả 6 file
+async function launchSuperQuiz() {
+    const hubMenu = document.getElementById('hub-menu');
+    const sandbox = document.getElementById('quiz-sandbox');
+    hubMenu.style.display = 'none';
+    sandbox.style.display = 'block';
+
+    document.getElementById('sandbox-q').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang tải và trộn ngẫu nhiên dữ liệu từ 6 đề thi...`;
+
+    const fileList = [
+        'quiz.html',
+        'quiz_sttech.html',
+        'quiz_de_nham_lan.html',
+        'quiz_lien_thong_du_lieu.html',
+        'quiz_tinh_huong_thuc_te.html',
+        'quiz_can_cu_phap_ly.html'
+    ];
+
+    let fullPool = [];
+
+    for (let file of fileList) {
+        try {
+            let res = await fetch(file);
+            let text = await res.text();
+            
+            // Tìm mảng quizData bên trong thẻ <script>
+            let match = text.match(/const\s+quizData\s*=\s*(\[[\s\S]*?\]);/);
+            if (match && match[1]) {
+                // Parse JSON an toàn
+                let parsed = new Function(`return ${match[1]}`)();
+                // Chuẩn hóa cấu trúc câu hỏi
+                parsed.forEach(item => {
+                    let formattedQuestion = item.question || item.q;
+                    let formattedAnswer = (typeof item.correct_answer === 'string') 
+                        ? item.correct_answer.charCodeAt(0) - 65 
+                        : (item.correct_answer !== undefined ? item.correct_answer : item.answer);
+                    let formattedExp = item.explanation || item.exp;
+
+                    fullPool.push({
+                        q: formattedQuestion,
+                        options: item.options,
+                        answer: formattedAnswer,
+                        exp: formattedExp
+                    });
+                });
+            }
+        } catch (e) {
+            console.warn("Lỗi đọc file: " + file, e);
+        }
+    }
+
+    if (fullPool.length === 0) {
+        document.getElementById('sandbox-q').innerText = "Không thể tải dữ liệu tự động. Hãy đảm bảo bạn đã mở trên GitHub Pages.";
+        return;
+    }
+
+    // Trộn Fisher-Yates toàn bộ ngân hàng câu hỏi
+    for (let i = fullPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [fullPool[i], fullPool[j]] = [fullPool[j], fullPool[i]];
+    }
+
+    // Chọn ngẫu nhiên 35 câu làm Đề số 7
+    superQuestions = fullPool.slice(0, 35);
+    curIdx = 0;
+    superScore = 0;
+    loadSandboxQuestion();
+}
+
+function loadSandboxQuestion() {
+    isAnswered = false;
+    document.getElementById('sandbox-exp').style.display = 'none';
+    document.getElementById('sandbox-next').style.display = 'none';
+
+    let item = superQuestions[curIdx];
+    document.getElementById('q-counter').innerText = `${curIdx + 1}/${superQuestions.length}`;
+    document.getElementById('score-counter').innerText = superScore;
+    document.getElementById('p-fill').style.width = `${((curIdx + 1) / superQuestions.length) * 100}%`;
+    document.getElementById('sandbox-q').innerText = `Câu ${curIdx + 1}: ${item.q}`;
+
+    let optsContainer = document.getElementById('sandbox-opts');
+    optsContainer.innerHTML = '';
+
+    item.options.forEach((opt, idx) => {
+        let btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkSandboxAnswer(btn, idx, item.answer, item.exp);
+        optsContainer.appendChild(btn);
+    });
+}
+
+function checkSandboxAnswer(selectedBtn, userIdx, correctIdx, exp) {
+    if (isAnswered) return;
+    isAnswered = true;
+
+    let buttons = document.querySelectorAll('.opt-btn');
+    buttons.forEach(b => b.disabled = true);
+
+    if (userIdx === correctIdx) {
+        selectedBtn.classList.add('correct');
+        superScore++;
+        document.getElementById('score-counter').innerText = superScore;
+    } else {
+        selectedBtn.classList.add('incorrect');
+        if (buttons[correctIdx]) buttons[correctIdx].classList.add('correct');
+    }
+
+    let expBox = document.getElementById('sandbox-exp');
+    expBox.innerHTML = `💡 <b>Đáp án & Giải thích:</b> ${exp}`;
+    expBox.style.display = 'block';
+
+    let nextBtn = document.getElementById('sandbox-next');
+    if (curIdx === superQuestions.length - 1) {
+        nextBtn.innerText = "Xem Điểm Tổng Kết ➔";
+    } else {
+        nextBtn.innerText = "Câu Tiếp Theo ➔";
+    }
+    nextBtn.style.display = 'block';
+}
+
+function stepNextQuestion() {
+    curIdx++;
+    if (curIdx < superQuestions.length) {
+        loadSandboxQuestion();
+    } else {
+        document.getElementById('sandbox-q').innerHTML = `
+            <h2>🎉 HOÀN THÀNH ĐỀ TỔNG HỢP!</h2>
+            <div style="font-size: 3rem; color: #38bdf8; font-weight: 800; margin: 15px 0;">${superScore} / ${superQuestions.length}</div>
+            <p style="color: #94a3b8;">Đã kiểm tra ngẫu nhiên kiến thức tích hợp từ cả 6 chuyên đề.</p>
+        `;
+        document.getElementById('sandbox-opts').innerHTML = '';
+        document.getElementById('sandbox-exp').style.display = 'none';
+        document.getElementById('sandbox-next').style.display = 'none';
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+    }
+}
+
+function backToHub() {
+    document.getElementById('hub-menu').style.display = 'block';
+    document.getElementById('quiz-sandbox').style.display = 'none';
+}
+</script>
 </body>
 </html>
