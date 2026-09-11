@@ -19,7 +19,7 @@
             --text-sub: #94a3b8;
         }
 
-        * { box-sizing: border-box; font-family: 'Quicksand', sans-serif; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        * { box-sizing: border-box; font-family: 'Quicksand', sans-serif; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
         body {
             background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 70%);
             margin: 0; padding: 30px 15px; min-height: 100vh;
@@ -27,308 +27,188 @@
         }
 
         .hub-container {
-            max-width: 900px; width: 100%;
+            max-width: 950px; width: 100%;
             background: var(--card-bg); backdrop-filter: blur(16px);
             border-radius: 28px; padding: 40px 30px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
 
-        .header-title { text-align: center; margin-bottom: 35px; }
+        .user-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #131b2e; border: 1.5px solid #23304d; border-radius: 14px;
+            padding: 12px 20px; margin-bottom: 25px;
+        }
+        .user-name-display { font-weight: 800; color: #38bdf8; font-size: 1.05rem; }
+        .btn-change-name {
+            background: transparent; border: 1px solid #475569; color: #94a3b8;
+            padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: 700;
+        }
+        .btn-change-name:hover { border-color: var(--primary); color: white; }
+
+        .header-title { text-align: center; margin-bottom: 30px; }
         .header-title h1 {
-            font-family: 'Fredoka One', cursive; font-size: 2.3rem; margin: 0;
+            font-family: 'Fredoka One', cursive; font-size: 2.2rem; margin: 0;
             background: linear-gradient(135deg, #a5b4fc, #6366f1, #38bdf8);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
         }
-        .header-title p { color: var(--text-sub); margin-top: 8px; font-size: 1rem; }
+        .header-title p { color: var(--text-sub); margin-top: 6px; font-size: 0.95rem; }
 
-        /* Grid Menu 3D */
-        .grid-modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-bottom: 25px; }
+        .grid-modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 25px; }
         .card-3d {
             background: #131b2e; border: 1px solid #23304d; border-radius: 18px;
             padding: 20px; text-decoration: none; color: var(--text-main);
-            display: flex; flex-direction: column; justify-content: space-between;
-            box-shadow: 0 8px 0 #0d121f, 0 15px 20px rgba(0,0,0,0.4);
-            transform: translateY(0); cursor: pointer;
+            box-shadow: 0 8px 0 #0d121f; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;
         }
-        .card-3d:hover {
-            transform: translateY(-5px); border-color: var(--primary);
-            box-shadow: 0 13px 0 #0d121f, 0 20px 25px var(--primary-glow);
-        }
-        .card-3d:active { transform: translateY(3px); box-shadow: 0 3px 0 #0d121f; }
-        .card-icon { font-size: 1.8rem; margin-bottom: 12px; }
-        .card-name { font-size: 1.05rem; font-weight: 800; line-height: 1.4; }
+        .card-3d:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 12px 0 #0d121f, 0 15px 25px var(--primary-glow); }
+        .card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+        .card-name { font-size: 1.05rem; font-weight: 800; }
         .card-desc { font-size: 0.82rem; color: var(--text-sub); margin-top: 6px; }
 
-        /* Nút Chế độ Tổng Hợp 3D Độc Lập */
         .btn-super-random {
-            width: 100%; border: none; border-radius: 20px; padding: 22px;
+            width: 100%; border: none; border-radius: 20px; padding: 20px;
             background: linear-gradient(135deg, #4f46e5, #9333ea);
-            color: white; font-size: 1.2rem; font-weight: 800; cursor: pointer;
-            box-shadow: 0 8px 0 #312e81, 0 15px 25px rgba(79, 70, 229, 0.4);
-            display: flex; align-items: center; justify-content: center; gap: 12px;
+            color: white; font-size: 1.15rem; font-weight: 800; cursor: pointer;
+            box-shadow: 0 8px 0 #312e81; display: flex; align-items: center; justify-content: center; gap: 12px;
+            margin-bottom: 35px;
         }
-        .btn-super-random:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 11px 0 #312e81, 0 20px 30px rgba(79, 70, 229, 0.5); }
-        .btn-super-random:active { transform: translateY(4px); box-shadow: 0 2px 0 #312e81; }
+        .btn-super-random:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #312e81; }
 
-        /* Khung Thi Đề 7 (Ẩn mặc định) */
-        #quiz-sandbox { display: none; margin-top: 15px; }
-        .progress-bar { width: 100%; height: 10px; background: #1f293d; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #38bdf8); }
-        .q-box {
-            background: #111827; border: 1.5px solid #2d3748; border-radius: 16px;
-            padding: 22px; margin-bottom: 20px; text-align: center;
-        }
-        .q-text { font-size: 1.15rem; font-weight: 700; line-height: 1.55; }
-        .opts-grid { display: grid; gap: 12px; }
-        .opt-btn {
-            background: #1f293d; border: 2px solid #2d3748; color: #fff;
-            padding: 15px 20px; border-radius: 14px; text-align: left;
-            font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 #141b27;
-        }
-        .opt-btn:hover:not([disabled]) { border-color: var(--primary); transform: translateY(-2px); }
-        .opt-btn.correct { background: #064e3b !important; border-color: var(--success) !important; }
-        .opt-btn.incorrect { background: #7f1d1d !important; border-color: var(--danger) !important; }
-        .exp-box {
-            background: #1e1b4b; border-left: 4px solid var(--primary);
-            padding: 15px; border-radius: 8px; font-size: 0.95rem; line-height: 1.5;
-            color: #cbd5e1; margin-top: 18px; display: none;
-        }
-        .next-btn {
-            background: var(--primary); color: white; border: none; border-radius: 12px;
-            padding: 14px 28px; font-size: 1rem; font-weight: bold; cursor: pointer;
-            box-shadow: 0 5px 0 #4338ca; float: right; margin-top: 15px; display: none;
-        }
+        /* Bảng lịch sử điểm */
+        .history-section { border-top: 1.5px solid rgba(255,255,255,0.1); padding-top: 25px; }
+        .history-title { font-weight: 800; font-size: 1.15rem; color: #a5b4fc; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .history-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; }
+        .history-table th { background: #131b2e; padding: 12px 14px; color: var(--text-sub); border-bottom: 2px solid #23304d; }
+        .history-table td { padding: 12px 14px; border-bottom: 1px solid #1e293b; }
+        .badge-rating { padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; }
+        .rating-good { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .rating-bad { background: rgba(239, 68, 68, 0.2); color: #f87171; }
     </style>
 </head>
 <body>
 
 <div class="hub-container">
-    <!-- MÀN HÌNH CHỦ LỰA CHỌN -->
-    <div id="hub-menu">
-        <div class="header-title">
-            <h1>HỆ SINH THÁI KHẢO THÍ STTECH</h1>
-            <p>Chọn phân hệ bài thi riêng lẻ hoặc kích hoạt phòng luyện ngẫu nhiên</p>
+    <div class="user-bar">
+        <div class="user-name-display">
+            <i class="fa-solid fa-user-check"></i> Xin chào: <span id="current-user-name">Học viên STTech</span>
         </div>
-
-        <div class="grid-modules">
-            <a href="quiz.html" class="card-3d">
-                <div>
-                    <div class="card-icon" style="color: #818cf8;"><i class="fa-solid fa-list-check"></i></div>
-                    <div class="card-name">1. Bản Đầy Đủ & Pháp Lý</div>
-                    <div class="card-desc">40 câu hỏi nền tảng, tính năng và quy chế pháp lý.</div>
-                </div>
-            </a>
-            <a href="quiz_sttech.html" class="card-3d">
-                <div>
-                    <div class="card-icon" style="color: #38bdf8;"><i class="fa-solid fa-tags"></i></div>
-                    <div class="card-name">2. Tên Gọi & Mã Viết Tắt</div>
-                    <div class="card-desc">30 câu luyện phản xạ tên tiếng Anh và từ viết tắt.</div>
-                </div>
-            </a>
-            <a href="quiz_de_nham_lan.html" class="card-3d">
-                <div>
-                    <div class="card-icon" style="color: #c084fc;"><i class="fa-solid fa-code-compare"></i></div>
-                    <div class="card-name">3. Cặp Đôi Dễ Nhầm Lẫn</div>
-                    <div class="card-desc">20 câu đối đầu ranh giới tính năng các phần mềm.</div>
-                </div>
-            </a>
-            <a href="quiz_lien_thong_du_lieu.html" class="card-3d">
-                <div>
-                    <div class="card-icon" style="color: #34d399;"><i class="fa-solid fa-network-wired"></i></div>
-                    <div class="card-name">4. Mạng Lưới Liên Thông</div>
-                    <div class="card-desc">20 câu luồng trao đổi dữ liệu nội bộ và CSDL Bộ.</div>
-                </div>
-            </a>
-            <a href="quiz_tinh_huong_thuc_te.html" class="card-3d">
-                <div>
-                    <div class="card-icon" style="color: #fbbf24;"><i class="fa-solid fa-briefcase"></i></div>
-                    <div class="card-name">5. Tình Huống Khách Hàng</div>
-                    <div class="card-desc">25 bài toán thực tiễn từ Sở, Phòng và Nhà trường.</div>
-                </div>
-            </a>
-            <a href="quiz_can_cu_phap_ly.html" class="card-3d">
-                <div>
-                    <div class="card-icon" style="color: #f472b6;"><i class="fa-solid fa-scale-balanced"></i></div>
-                    <div class="card-name">6. Căn Cứ Pháp Lý Chuyên Sâu</div>
-                    <div class="card-desc">30 câu hóc búa về Thông tư, Nghị định và Quyết định.</div>
-                </div>
-            </a>
-        </div>
-
-        <button class="btn-super-random" onclick="launchSuperQuiz()">
-            <i class="fa-solid fa-shuffle fa-spin"></i>
-            KÍCH HOẠT ĐỀ SỐ 7: THI ĐẤU TỔNG HỢP NGẪU NHIÊN (35 CÂU)
-        </button>
+        <button class="btn-change-name" onclick="changeName()"><i class="fa-solid fa-pen"></i> Đổi tên</button>
     </div>
 
-    <!-- PHÒNG THI ĐỀ SỐ 7 ĐỘC LẬP TỰ SINH -->
-    <div id="quiz-sandbox">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <button onclick="backToHub()" style="background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 6px 14px; border-radius: 8px; cursor: pointer;">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
-            </button>
-            <div style="font-weight: 800; color: #38bdf8;">Đề Số 7: <span id="q-counter">0/0</span> | Đúng: <span id="score-counter">0</span></div>
+    <div class="header-title">
+        <h1>HỆ SINH THÁI KHẢO THÍ STTECH</h1>
+        <p>Mỗi đề rút gọn ngẫu nhiên 15 câu chống ngán • Tự động ghi điểm & xếp loại</p>
+    </div>
+
+    <div class="grid-modules">
+        <a href="quiz.html" class="card-3d">
+            <div>
+                <div class="card-icon" style="color: #818cf8;"><i class="fa-solid fa-list-check"></i></div>
+                <div class="card-name">1. Bản Đầy Đủ & Pháp Lý</div>
+                <div class="card-desc">Lấy ngẫu nhiên 15 câu từ ngân hàng 40 câu.</div>
+            </div>
+        </a>
+        <a href="quiz_sttech.html" class="card-3d">
+            <div>
+                <div class="card-icon" style="color: #38bdf8;"><i class="fa-solid fa-tags"></i></div>
+                <div class="card-name">2. Tên Gọi & Mã Viết Tắt</div>
+                <div class="card-desc">Lấy ngẫu nhiên 15 câu từ ngân hàng 30 câu.</div>
+            </div>
+        </a>
+        <a href="quiz_de_nham_lan.html" class="card-3d">
+            <div>
+                <div class="card-icon" style="color: #c084fc;"><i class="fa-solid fa-code-compare"></i></div>
+                <div class="card-name">3. Cặp Đôi Dễ Nhầm Lẫn</div>
+                <div class="card-desc">Lấy ngẫu nhiên 15 câu từ ngân hàng 20 câu.</div>
+            </div>
+        </a>
+        <a href="quiz_lien_thong_du_lieu.html" class="card-3d">
+            <div>
+                <div class="card-icon" style="color: #34d399;"><i class="fa-solid fa-network-wired"></i></div>
+                <div class="card-name">4. Mạng Lưới Liên Thông</div>
+                <div class="card-desc">Lấy ngẫu nhiên 15 câu từ ngân hàng 20 câu.</div>
+            </div>
+        </a>
+        <a href="quiz_tinh_huong_thuc_te.html" class="card-3d">
+            <div>
+                <div class="card-icon" style="color: #fbbf24;"><i class="fa-solid fa-briefcase"></i></div>
+                <div class="card-name">5. Tình Huống Khách Hàng</div>
+                <div class="card-desc">Lấy ngẫu nhiên 15 câu từ ngân hàng 25 câu.</div>
+            </div>
+        </a>
+        <a href="quiz_can_cu_phap_ly.html" class="card-3d">
+            <div>
+                <div class="card-icon" style="color: #f472b6;"><i class="fa-solid fa-scale-balanced"></i></div>
+                <div class="card-name">6. Căn Cứ Pháp Lý Chuyên Sâu</div>
+                <div class="card-desc">Lấy ngẫu nhiên 15 câu từ ngân hàng 30 câu.</div>
+            </div>
+        </a>
+    </div>
+
+    <a href="index.html" class="btn-super-random" onclick="alert('Hãy chọn nút Đề 7 nếu muốn thi tổng hợp 35 câu!'); return false;">
+        <i class="fa-solid fa-shuffle"></i>
+        ĐỀ 7: TỔNG HỢP 35 CÂU TỪ TẤT CẢ CÁC ĐỀ (ÔN LUYỆN TOÀN DIỆN)
+    </a>
+
+    <!-- BẢNG LỊCH SỬ KẾT QUẢ THI -->
+    <div class="history-section">
+        <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Làm Bài & Điểm Số Gần Đây</div>
+        <div style="overflow-x: auto;">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Học viên</th>
+                        <th>Đề thi</th>
+                        <th>Điểm số</th>
+                        <th>Tỷ lệ</th>
+                        <th>Đánh giá</th>
+                    </tr>
+                </thead>
+                <tbody id="history-rows">
+                    <tr><td colspan="6" style="text-align: center; color: #64748b;">Chưa có lịch sử làm bài nào. Hãy chọn một đề để bắt đầu!</td></tr>
+                </tbody>
+            </table>
         </div>
-        <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
-        <div class="q-box">
-            <div class="q-text" id="sandbox-q">Đang bóc tách dữ liệu câu hỏi từ 6 bộ đề...</div>
-        </div>
-        <div class="opts-grid" id="sandbox-opts"></div>
-        <div class="exp-box" id="sandbox-exp"></div>
-        <button class="next-btn" id="sandbox-next" onclick="stepNextQuestion()">Câu Tiếp Theo ➔</button>
     </div>
 </div>
 
 <script>
-let superQuestions = [];
-let curIdx = 0;
-let superScore = 0;
-let isAnswered = false;
+    // Quản lý tên thí sinh
+    let currentName = localStorage.getItem('sttech_user_name') || 'Học viên STTech';
+    document.getElementById('current-user-name').innerText = currentName;
 
-// Thuật toán quét và trích xuất quizData từ cả 6 file
-async function launchSuperQuiz() {
-    const hubMenu = document.getElementById('hub-menu');
-    const sandbox = document.getElementById('quiz-sandbox');
-    hubMenu.style.display = 'none';
-    sandbox.style.display = 'block';
-
-    document.getElementById('sandbox-q').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang tải và trộn ngẫu nhiên dữ liệu từ 6 đề thi...`;
-
-    const fileList = [
-        'quiz.html',
-        'quiz_sttech.html',
-        'quiz_de_nham_lan.html',
-        'quiz_lien_thong_du_lieu.html',
-        'quiz_tinh_huong_thuc_te.html',
-        'quiz_can_cu_phap_ly.html'
-    ];
-
-    let fullPool = [];
-
-    for (let file of fileList) {
-        try {
-            let res = await fetch(file);
-            let text = await res.text();
-            
-            // Tìm mảng quizData bên trong thẻ <script>
-            let match = text.match(/const\s+quizData\s*=\s*(\[[\s\S]*?\]);/);
-            if (match && match[1]) {
-                // Parse JSON an toàn
-                let parsed = new Function(`return ${match[1]}`)();
-                // Chuẩn hóa cấu trúc câu hỏi
-                parsed.forEach(item => {
-                    let formattedQuestion = item.question || item.q;
-                    let formattedAnswer = (typeof item.correct_answer === 'string') 
-                        ? item.correct_answer.charCodeAt(0) - 65 
-                        : (item.correct_answer !== undefined ? item.correct_answer : item.answer);
-                    let formattedExp = item.explanation || item.exp;
-
-                    fullPool.push({
-                        q: formattedQuestion,
-                        options: item.options,
-                        answer: formattedAnswer,
-                        exp: formattedExp
-                    });
-                });
-            }
-        } catch (e) {
-            console.warn("Lỗi đọc file: " + file, e);
+    function changeName() {
+        let newName = prompt("Nhập tên mới của bạn:", currentName);
+        if (newName && newName.trim() !== "") {
+            localStorage.setItem('sttech_user_name', newName.trim());
+            document.getElementById('current-user-name').innerText = newName.trim();
         }
     }
 
-    if (fullPool.length === 0) {
-        document.getElementById('sandbox-q').innerText = "Không thể tải dữ liệu tự động. Hãy đảm bảo bạn đã mở trên GitHub Pages.";
-        return;
+    // Đọc và hiển thị lịch sử thi từ localStorage
+    function loadHistoryTable() {
+        let history = JSON.parse(localStorage.getItem('sttech_history') || '[]');
+        let tbody = document.getElementById('history-rows');
+        if (history.length === 0) return;
+
+        tbody.innerHTML = '';
+        history.forEach(item => {
+            let row = document.createElement('tr');
+            let isGood = item.rating === "Xuất sắc" || item.rating === "Đạt";
+            row.innerHTML = `
+                <td style="color: #94a3b8;">${item.date}</td>
+                <td style="font-weight: 700; color: #38bdf8;">${item.name}</td>
+                <td>${item.quiz}</td>
+                <td style="font-weight: 800; color: #f8fafc;">${item.score}</td>
+                <td style="font-weight: 700;">${item.percent}</td>
+                <td><span class="badge-rating ${isGood ? 'rating-good' : 'rating-bad'}">${item.rating}</span></td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 
-    // Trộn Fisher-Yates toàn bộ ngân hàng câu hỏi
-    for (let i = fullPool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [fullPool[i], fullPool[j]] = [fullPool[j], fullPool[i]];
-    }
-
-    // Chọn ngẫu nhiên 35 câu làm Đề số 7
-    superQuestions = fullPool.slice(0, 35);
-    curIdx = 0;
-    superScore = 0;
-    loadSandboxQuestion();
-}
-
-function loadSandboxQuestion() {
-    isAnswered = false;
-    document.getElementById('sandbox-exp').style.display = 'none';
-    document.getElementById('sandbox-next').style.display = 'none';
-
-    let item = superQuestions[curIdx];
-    document.getElementById('q-counter').innerText = `${curIdx + 1}/${superQuestions.length}`;
-    document.getElementById('score-counter').innerText = superScore;
-    document.getElementById('p-fill').style.width = `${((curIdx + 1) / superQuestions.length) * 100}%`;
-    document.getElementById('sandbox-q').innerText = `Câu ${curIdx + 1}: ${item.q}`;
-
-    let optsContainer = document.getElementById('sandbox-opts');
-    optsContainer.innerHTML = '';
-
-    item.options.forEach((opt, idx) => {
-        let btn = document.createElement('button');
-        btn.className = 'opt-btn';
-        btn.innerText = opt;
-        btn.onclick = () => checkSandboxAnswer(btn, idx, item.answer, item.exp);
-        optsContainer.appendChild(btn);
-    });
-}
-
-function checkSandboxAnswer(selectedBtn, userIdx, correctIdx, exp) {
-    if (isAnswered) return;
-    isAnswered = true;
-
-    let buttons = document.querySelectorAll('.opt-btn');
-    buttons.forEach(b => b.disabled = true);
-
-    if (userIdx === correctIdx) {
-        selectedBtn.classList.add('correct');
-        superScore++;
-        document.getElementById('score-counter').innerText = superScore;
-    } else {
-        selectedBtn.classList.add('incorrect');
-        if (buttons[correctIdx]) buttons[correctIdx].classList.add('correct');
-    }
-
-    let expBox = document.getElementById('sandbox-exp');
-    expBox.innerHTML = `💡 <b>Đáp án & Giải thích:</b> ${exp}`;
-    expBox.style.display = 'block';
-
-    let nextBtn = document.getElementById('sandbox-next');
-    if (curIdx === superQuestions.length - 1) {
-        nextBtn.innerText = "Xem Điểm Tổng Kết ➔";
-    } else {
-        nextBtn.innerText = "Câu Tiếp Theo ➔";
-    }
-    nextBtn.style.display = 'block';
-}
-
-function stepNextQuestion() {
-    curIdx++;
-    if (curIdx < superQuestions.length) {
-        loadSandboxQuestion();
-    } else {
-        document.getElementById('sandbox-q').innerHTML = `
-            <h2>🎉 HOÀN THÀNH ĐỀ TỔNG HỢP!</h2>
-            <div style="font-size: 3rem; color: #38bdf8; font-weight: 800; margin: 15px 0;">${superScore} / ${superQuestions.length}</div>
-            <p style="color: #94a3b8;">Đã kiểm tra ngẫu nhiên kiến thức tích hợp từ cả 6 chuyên đề.</p>
-        `;
-        document.getElementById('sandbox-opts').innerHTML = '';
-        document.getElementById('sandbox-exp').style.display = 'none';
-        document.getElementById('sandbox-next').style.display = 'none';
-        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
-    }
-}
-
-function backToHub() {
-    document.getElementById('hub-menu').style.display = 'block';
-    document.getElementById('quiz-sandbox').style.display = 'none';
-}
+    loadHistoryTable();
 </script>
 </body>
 </html>
