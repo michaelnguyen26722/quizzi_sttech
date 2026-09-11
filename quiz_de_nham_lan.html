@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STTech Contrast Master Quiz - Đối Đầu Cặp Đôi Dễ Nhầm Lẫn</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 780px;
+            padding: 30px;
+            box-sizing: border-box;
+            border: 1px solid #334155;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent-purple);
+        }
+
+        .score-board {
+            font-size: 0.95rem;
+            background: #0f172a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #334155;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #334155;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .contrast-badge {
+            display: inline-block;
+            background-color: rgba(139, 92, 246, 0.2);
+            color: #c084fc;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: #0f172a;
+            border: 1.5px solid #334155;
+            color: var(--text-main);
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 0.98rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--accent-purple);
+            background-color: #1e293b;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background-color: #064e3b !important;
+            border-color: var(--accent-green) !important;
+            color: #a7f3d0 !important;
+        }
+
+        .option-btn.incorrect {
+            background-color: #7f1d1d !important;
+            border-color: var(--accent-red) !important;
+            color: #fecaca !important;
+        }
+
+        .explanation-box {
+            background-color: #0f172a;
+            border-left: 4px solid var(--accent-purple);
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            color: var(--text-sub);
+            margin-top: 15px;
+            display: none;
+        }
+
+        .next-btn {
+            background-color: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            float: right;
+            display: none;
+        }
+
+        .next-btn:hover {
+            background-color: #7c3aed;
+        }
+
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent-green);
+            margin: 15px 0;
+        }
+
+        .restart-btn {
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="quiz-screen">
+        <div class="quiz-header">
+            <div class="quiz-title">⚡ Speed-Run Contrast Quiz (20 Câu)</div>
+            <div class="score-board">Câu <span id="current-q">1</span>/20 | Điểm: <span id="current-score">0</span></div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="contrast-badge" id="contrast-badge">Cặp đối đầu: ...</div>
+        <div class="question-text" id="question-text">Loading question...</div>
+        <div class="options-grid" id="options-grid"></div>
+        <div class="explanation-box" id="explanation-box"></div>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">Câu tiếp theo ➔</button>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h2>⚔️ HOÀN THÀNH SPEED-RUN CONTRAST QUIZ!</h2>
+        <p>Bạn đã chinh phục bộ câu hỏi đối đầu phân biệt các cặp phần mềm dễ nhầm lẫn nhất trong hệ sinh thái STTech.</p>
+        <div class="result-score"><span id="final-score">0</span> / 20</div>
+        <p id="result-comment"></p>
+        <button class="restart-btn" onclick="restartQuiz()">Luyện lại ngay để làm chủ 100%</button>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    {
+        pair: "ST-TMIS vs ST-CEMS",
+        q: "Một Sở GD&ĐT muốn dùng phần mềm vừa đánh giá Chuẩn nghề nghiệp nhà giáo (TT 14,20,25,26) vừa đánh giá xếp loại Công chức/Viên chức theo Nghị định 90 trong CÙNG MỘT HỆ THỐNG. Đâu là lựa chọn chính xác?",
+        options: [
+            "A. ST-CEMS - Vì phần mềm này chuyên về chuẩn nhà giáo.",
+            "B. ST-TMIS - Vì phần mềm này hợp nhất cả đánh giá Chuẩn nghề nghiệp VÀ Nghị định 90.",
+            "C. Cả hai phần mềm đều không có tính năng này.",
+            "D. ST-BHR - Vì quản lý lý lịch cán bộ."
+        ],
+        answer: 1,
+        exp: "<b>ST-TMIS</b> hợp nhất cả 2 quy trình: Đánh giá Chuẩn nghề nghiệp nhà giáo VÀ Đánh giá CCVC theo Nghị định 90. Trong khi <b>ST-CEMS</b> tập trung chuyên sâu vào Chuẩn nhà giáo và quy hoạch Cán bộ/Giáo viên cốt cán."
+    },
+    {
+        pair: "ST-BHR vs HRS",
+        q: "Điểm biệt định rõ nhất về mặt nghiệp vụ tài chính giữa ST-BHR và HRS là gì?",
+        options: [
+            "A. ST-BHR quản lý hồ sơ lý lịch mẫu 2C và cảnh báo nâng lương; còn HRS đi sâu vào tính lương chi tiết và lập dự toán quỹ lương.",
+            "B. ST-BHR dành cho doanh nghiệp tư nhân; HRS dành cho cơ quan nhà nước.",
+            "C. ST-BHR tính lương theo giờ; HRS tính lương theo tháng.",
+            "D. Hai phần mềm là một, chỉ khác tên theo phiên bản năm phát hành."
+        ],
+        answer: 0,
+        exp: "<b>ST-BHR</b> quản lý hồ sơ lý lịch, quá trình công tác, cảnh báo ngạch bậc lương/nghỉ hưu. <b>HRS</b> là hệ thống quản trị nhân sự tài chính chuyên sâu tính toán chi tiết bảng lương và lập dự toán chi trả lương."
+    },
+    {
+        pair: "ST-SMS vs EDIS",
+        q: "Nếu đơn vị cần giải pháp bóc tách dữ liệu văn bản bằng công nghệ OCR, kiểm định chất lượng QC gắt gao và ký số xác thực bản sao pháp lý, họ phải chọn phần mềm nào?",
+        options: [
+            "A. ST-SMS - Vì là phần mềm quản lý lưu trữ.",
+            "B. EDIS - Vì đây là Hệ thống số hóa chuyên sâu tích hợp OCR, QC và ký số xác thực.",
+            "C. ST-DMS - Vì quản lý văn bằng.",
+            "D. DTI - Vì đánh giá chuyển đổi số."
+        ],
+        answer: 1,
+        exp: "<b>EDIS</b> là hệ thống số hóa chuyên sâu (OCR, QC, Ký số bản sao điện tử). <b>ST-SMS</b> là phần mềm quản lý kho lưu trữ (cây Kho -> Kệ -> Phông -> Hộp và quy trình mượn trả)."
+    },
+    {
+        pair: "DTI vs QA",
+        q: "Cơ quan muốn đánh giá mức độ Số hóa và Chuyển đổi số toàn ngành theo bộ tiêu chí QĐ 3806/4725/3276 sẽ chọn DTI hay QA?",
+        options: [
+            "A. QA - Vì QA là Kiểm định chất lượng.",
+            "B. DTI - Vì DTI là Hệ thống Đánh giá Chuyển đổi số ngành Giáo dục.",
+            "C. Chọn phần mềm nào cũng như nhau.",
+            "D. EDU (EduPortal AI)."
+        ],
+        answer: 1,
+        exp: "<b>DTI</b> (Digital Transformation Index) phục vụ Đánh giá Mức độ Chuyển đổi số ngành giáo dục. <b>QA</b> (Quality Assurance) phục vụ Kiểm định chất lượng giáo dục trường học."
+    },
+    {
+        pair: "ST-EMS vs ST-ETEST",
+        q: "Trường học muốn tổ chức Lớp học ảo trực tuyến Meeting Online tích hợp Google Meet và quản lý bài giảng SCORM thì dùng phần mềm nào?",
+        options: [
+            "A. ST-ETEST - Vì tạo bài kiểm tra.",
+            "B. ST-EMS - Vì là Hệ thống Quản lý giáo dục & Dạy học trực tuyến.",
+            "C. EDIS - Vì lưu trữ file.",
+            "D. ST-AMS - Vì hỗ trợ học sinh."
+        ],
+        answer: 1,
+        exp: "<b>ST-EMS</b> cung cấp môi trường LMS/LCMS, lớp học ảo Meeting Online và quản lý bài giảng SCORM. <b>ST-ETEST</b> chuyên sâu về Ngân hàng câu hỏi, ma trận đề thi và trộn đề tổ hợp."
+    },
+    {
+        pair: "ST-AMS vs ST-DMS",
+        q: "Hai phần mềm ST-AMS và ST-DMS dễ gây nhầm lẫn do đuôi 'MS'. Phân định đối tượng và đầu ra nghiệp vụ của từng phần mềm như thế nào?",
+        options: [
+            "A. ST-AMS xử lý học sinh đầu vào (Tuyển sinh đầu cấp); ST-DMS xử lý học sinh đầu ra (Quản lý văn bằng chứng chỉ & Sổ gốc).",
+            "B. ST-AMS quản lý bằng cấp; ST-DMS quản lý tuyển sinh.",
+            "C. ST-AMS dành cho cấp Đại học; ST-DMS dành cho mầm non.",
+            "D. Cả hai phần mềm đều quản lý tài chính trường học."
+        ],
+        answer: 0,
+        exp: "<b>ST-AMS</b> (Admission MS) quản lý <i>ĐẦU VÀO</i> - Tuyển sinh mầm non, tiểu học, THCS. <b>ST-DMS</b> (Diploma MS) quản lý <i>ĐẦU RA</i> - Xét tốt nghiệp, sổ gốc, phôi bằng và cấp bản sao trực tuyến."
+    },
+    {
+        pair: "EDU (EduPortal AI) vs DTI",
+        q: "Điểm khác biệt chính giữa Cổng EDU (EduPortal AI) và Hệ thống DTI là gì?",
+        options: [
+            "A. EDU là Cổng thông tin giao tiếp công khai (có Trợ lý AI, TT 09/2024); DTI là Hệ thống đánh giá chấm điểm chỉ số Chuyển đổi số nội bộ ngành.",
+            "B. EDU dùng cho Phòng GD; DTI dùng cho Học sinh.",
+            "C. EDU để thi trắc nghiệm; DTI để quản lý thư viện.",
+            "D. Hai phần mềm hoàn toàn giống nhau."
+        ],
+        answer: 0,
+        exp: "<b>EDU</b> là Cổng thông tin điện tử công khai tích hợp Trợ lý AI giao tiếp công chúng. <b>DTI</b> là hệ thống chấm điểm thẩm định chỉ số Chuyển đổi số 4 bước của ngành."
+    },
+    {
+        pair: "ST-LIB vs ST-SMS",
+        q: "Thủ thư trường học quản lý sách, mã phân loại DDC/Cutter và lượt đọc sách 3D sẽ dùng ST-LIB hay ST-SMS?",
+        options: [
+            "A. ST-SMS - Vì quản lý lưu trữ.",
+            "B. ST-LIB - Vì đây là Phần mềm Quản lý Thư viện trường học.",
+            "C. EDIS - Vì số hóa tài liệu.",
+            "D. DTI - Vì chuyển đổi số."
+        ],
+        answer: 1,
+        exp: "<b>ST-LIB</b> dành cho Thư viện trường học (sách, tạp chí, biên mục DDC/Cutter, sách 3D). <b>ST-SMS</b> dành cho Lưu trữ lịch sử hành chính cơ quan (hồ sơ, công văn, cây kho/kệ/phông/hộp)."
+    },
+    {
+        pair: "ST-KPI vs ST-BHR",
+        q: "Nếu ban thi đua muốn lấy điểm đánh giá hiệu suất công việc định kỳ theo Nghị định 90 & NĐ 48, họ chọn ST-KPI hay ST-BHR?",
+        options: [
+            "A. ST-BHR - Vì quản lý nhân sự.",
+            "B. ST-KPI - Vì là Phần mềm Đánh giá xếp loại chất lượng KPI theo Nghị định 90 & NĐ 48.",
+            "C. ST-SMS - Vì lưu hồ sơ.",
+            "D. ST-LIB - Vì đánh giá thư viện."
+        ],
+        answer: 1,
+        exp: "<b>ST-KPI</b> chuyên trách chấm điểm tiêu chí hiệu suất KPI theo NĐ 90 & NĐ 48. <b>ST-BHR</b> quản lý thông tin lý lịch cá nhân, khen thưởng/kỷ luật và đếm ngược thời gian nâng lương."
+    },
+    {
+        pair: "ST-TMIS vs ST-CEMS",
+        q: "Tính năng 'Tự động thống kê và gợi ý danh sách cán bộ/giáo viên gần đủ điều kiện thành Giáo viên cốt cán' thuộc về phần mềm nào?",
+        options: [
+            "A. ST-TMIS",
+            "B. ST-CEMS",
+            "C. ST-KPI",
+            "D. ST-BHR"
+        ],
+        answer: 1,
+        exp: "Đây là tính năng độc quyền nổi bật của <b>ST-CEMS</b> phục vụ công tác quy hoạch phát triển đội ngũ nhà giáo cốt cán tại địa phương."
+    },
+    {
+        pair: "ST-DMS vs EDIS",
+        q: "Khi dân xin cấp bản sao Bằng tốt nghiệp THCS qua Cổng Dịch vụ công, phần mềm nào sẽ thụ lý duyệt sổ gốc và trả kết quả?",
+        options: [
+            "A. EDIS",
+            "B. ST-DMS",
+            "C. ST-SMS",
+            "D. ST-AMS"
+        ],
+        answer: 1,
+        exp: "<b>ST-DMS</b> xử lý nghiệp vụ Cấp bản sao từ sổ gốc trực tuyến Mức 3-4. <b>EDIS</b> là công cụ quét số hóa đầu vào cho kho tư liệu."
+    },
+    {
+        pair: "ST-ETEST vs ST-EMS",
+        q: "Giáo viên muốn tạo đề thi xáo trộn câu hỏi theo 'Phương pháp tổ hợp' đánh giá năng lực học sinh sẽ thao tác trên phần mềm nào?",
+        options: [
+            "A. ST-EMS",
+            "B. ST-ETEST",
+            "C. EDU",
+            "D. DTI"
+        ],
+        answer: 1,
+        exp: "Kỹ thuật tạo ma trận và trộn đề thi tổ hợp đa môn là tính năng cốt lõi của <b>ST-ETEST</b>."
+    },
+    {
+        pair: "ST-AMS vs ST-EMS",
+        q: "Phụ huynh đăng ký cho con vào lớp 1 theo đúng địa bàn tuyến Thôn/Xóm sẽ dùng ST-AMS hay ST-EMS?",
+        options: [
+            "A. ST-EMS - Vì học trực tuyến.",
+            "B. ST-AMS - Vì đây là Phần mềm Quản lý tuyển sinh đầu cấp.",
+            "C. ST-DMS - Vì cấp hồ sơ.",
+            "D. EDU - Vì tra cứu điểm."
+        ],
+        answer: 1,
+        exp: "<b>ST-AMS</b> hỗ trợ phụ huynh nộp hồ sơ tuyển sinh đầu cấp trực tuyến và phân tuyến theo địa bàn thôn/ấp."
+    },
+    {
+        pair: "ST-BHR vs ST-TMIS",
+        q: "Tính năng xuất Sơ yếu lý lịch chuẩn biểu mẫu 2C/HS02 của Bộ Nội vụ thuộc về phần mềm nào?",
+        options: [
+            "A. ST-TMIS",
+            "B. ST-BHR",
+            "C. ST-KPI",
+            "D. HRS"
+        ],
+        answer: 1,
+        exp: "<b>ST-BHR</b> chuyên trách trích xuất hồ sơ cán bộ công chức theo mẫu 2C/HS02."
+    },
+    {
+        pair: "ST-LIB vs QA",
+        q: "Thủ thư muốn xuất Báo cáo tự đánh giá Thư viện đạt chuẩn theo Thông tư 16/2022/TT-BGDĐT sẽ chọn ST-LIB hay QA?",
+        options: [
+            "A. QA - Vì QA đánh giá kiểm định.",
+            "B. ST-LIB - Vì ST-LIB tích hợp sẵn Phân hệ Đánh giá thư viện đạt chuẩn theo TT 16.",
+            "C. DTI - Vì đánh giá số.",
+            "D. EDIS - Vì lưu kho."
+        ],
+        answer: 1,
+        exp: "<b>ST-LIB</b> tích hợp sẵn phân hệ Đánh giá thư viện đạt chuẩn Thông tư 16 và tự động lấy minh chứng từ lượt mượn trả."
+    },
+    {
+        pair: "ST-SMS vs ST-DMS",
+        q: "Phần mềm nào quản lý theo cây thư mục phân cấp 'Kho -> Giá/Kệ -> Phông -> Hộp -> Hồ sơ'?",
+        options: [
+            "A. ST-DMS",
+            "B. ST-SMS",
+            "C. EDIS",
+            "D. ST-LIB"
+        ],
+        answer: 1,
+        exp: "Đó là mô hình lưu trữ chuẩn Cây phân cấp của <b>ST-SMS</b> (Storage Management System)."
+    },
+    {
+        pair: "HRS vs ST-KPI",
+        q: "Phần mềm nào lập dự toán ngân sách chi trả lương hàng năm cho toàn bộ cán bộ viên chức trong đơn vị?",
+        options: [
+            "A. ST-KPI",
+            "B. HRS",
+            "C. ST-BHR",
+            "D. ST-TMIS"
+        ],
+        answer: 1,
+        exp: "<b>HRS</b> (Human Resource System) phụ trách dự toán quỹ lương và quản lý chi tiết bảng lương."
+    },
+    {
+        pair: "EDIS vs DTI",
+        q: "Tính năng tự động đóng gói dữ liệu số hóa theo tiêu chuẩn lưu trữ để truyền sang các hệ thống khác thuộc về phần mềm nào?",
+        options: [
+            "A. DTI",
+            "B. EDIS",
+            "C. QA",
+            "D. EDU"
+        ],
+        answer: 1,
+        exp: "Đó là khâu Đóng gói dữ liệu tự động trong quy trình 6 bước của <b>EDIS</b>."
+    },
+    {
+        pair: "EDU (EduPortal AI) vs ST-EMS",
+        q: "Trợ lý AI trả lời tự động thắc mắc về tuyển sinh và học bạ số nằm trên giải pháp nào?",
+        options: [
+            "A. ST-EMS",
+            "B. EDU (EduPortal AI)",
+            "C. ST-AMS",
+            "D. ST-ETEST"
+        ],
+        answer: 1,
+        exp: "<b>EduPortal AI (EDU)</b> tích hợp Trợ lý AI giải đáp thắc mắc thủ tục hành chính công khai."
+    },
+    {
+        pair: "ST-KPI vs ST-CEMS",
+        q: "Phần mềm nào chấm điểm đánh giá cả TẬP THỂ phòng ban lẫn CÁ NHÂN công chức?",
+        options: [
+            "A. ST-CEMS - Vì đánh giá giáo viên.",
+            "B. ST-KPI - Vì là Phần mềm Đánh giá xếp loại chất lượng tập thể và cá nhân.",
+            "C. ST-LIB - Vì đánh giá thư viện.",
+            "D. ST-ETEST - Vì chấm điểm thi."
+        ],
+        answer: 1,
+        exp: "<b>ST-KPI</b> thực hiện Đánh giá xếp loại chất lượng cho cả TẬP THỂ đơn vị và CÁ NHÂN công chức/viên chức."
+    }
+];
+
+let currentQ = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    const qData = quizData[currentQ];
+    document.getElementById("current-q").innerText = currentQ + 1;
+    document.getElementById("current-score").innerText = score;
+    document.getElementById("contrast-badge").innerText = `⚔️ Cặp đối đầu: ${qData.pair}`;
+    document.getElementById("question-text").innerText = `Câu ${currentQ + 1}: ${qData.q}`;
+    
+    const progressPercent = ((currentQ + 1) / quizData.length) * 100;
+    document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+
+    const optionsGrid = document.getElementById("options-grid");
+    optionsGrid.innerHTML = "";
+
+    qData.options.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerText = opt;
+        btn.onclick = () => selectOption(idx);
+        optionsGrid.appendChild(btn);
+    });
+
+    document.getElementById("explanation-box").style.display = "none";
+    document.getElementById("next-btn").style.display = "none";
+}
+
+function selectOption(index) {
+    if (answered) return;
+    answered = true;
+
+    const qData = quizData[currentQ];
+    const buttons = document.querySelectorAll(".option-btn");
+
+    buttons.forEach((btn) => btn.disabled = true);
+
+    if (index === qData.answer) {
+        buttons[index].classList.add("correct");
+        score++;
+        document.getElementById("current-score").innerText = score;
+    } else {
+        buttons[index].classList.add("incorrect");
+        buttons[qData.answer].classList.add("correct");
+    }
+
+    const expBox = document.getElementById("explanation-box");
+    expBox.innerHTML = `💡 <b>Phân tích điểm khác biệt:</b> ${qData.exp}`;
+    expBox.style.display = "block";
+
+    document.getElementById("next-btn").style.display = "block";
+}
+
+function nextQuestion() {
+    currentQ++;
+    if (currentQ < quizData.length) {
+        loadQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    document.getElementById("quiz-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+    document.getElementById("final-score").innerText = score;
+
+    let comment = "";
+    if (score === 20) comment = "🔥 BẬC THẦY BẮT BỆNH SẢN PHẨM! Bạn phân biệt chính xác 100% tất cả các cặp phần mềm dễ nhầm lẫn nhất!";
+    else if (score >= 16) comment = "👏 RẤT GIỎI! Tư duy phản xạ phân biệt sản phẩm của bạn đã đạt trên 80%.";
+    else if (score >= 12) comment = "👍 KHÁ TỐT! Bạn nắm chắc các phần mềm chính, cần chú ý thêm cặp ST-TMIS vs ST-CEMS và ST-BHR vs HRS.";
+    else comment = "💪 NỔ LỰC HƠN! Làm lại bài kiểm tra đối đầu này 1 lần nữa để khắc sâu ranh giới tính năng nhé!";
+
+    document.getElementById("result-comment").innerText = comment;
+}
+
+function restartQuiz() {
+    currentQ = 0;
+    score = 0;
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("quiz-screen").style.display = "block";
+    loadQuestion();
+}
+
+loadQuestion();
+</script>
+</body>
+</html>
